@@ -24,14 +24,14 @@ import com.google.samples.apps.nowinandroid.core.model.data.mapToUserNewsResourc
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestNewsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.emptyUserData
+import de.infix.testBalloon.framework.testFixture
 import de.infix.testBalloon.framework.testSuite
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
 
 val CompositeUserNewsResourceRepositoryTest by testSuite {
-
-    val fixture = testFixture {
+    testFixture {
         object {
             val newsRepository = TestNewsRepository()
             val userDataRepository = TestUserDataRepository()
@@ -40,49 +40,32 @@ val CompositeUserNewsResourceRepositoryTest by testSuite {
                 userDataRepository = userDataRepository,
             )
         }
-    } asContextForEach { }
-
-    test("when no filters all news resources are returned") {
-        with(fixture) {
-            // Obtain the user news resources flow.
+    } asContextForEach {
+        test("when no filters all news resources are returned") {
             val userNewsResources = userNewsResourceRepository.observeAll()
 
-            // Send some news resources and user data into the data repositories.
             newsRepository.sendNewsResources(sampleNewsResources)
 
-            // Construct the test user data with bookmarks and followed topics.
             val userData = emptyUserData.copy(
                 bookmarkedNewsResources = setOf(sampleNewsResources[0].id, sampleNewsResources[2].id),
                 followedTopics = setOf(sampleTopic1.id),
             )
-
             userDataRepository.setUserData(userData)
 
-            // Check that the correct news resources are returned with their bookmarked state.
             assertEquals(
                 sampleNewsResources.mapToUserNewsResources(userData),
                 userNewsResources.first(),
             )
         }
-    }
 
-    test("when filtered by topic id matching news resources are returned") {
-        with(fixture) {
-            // Obtain a stream of user news resources for the given topic id.
-            val userNewsResources =
-                userNewsResourceRepository.observeAll(
-                    NewsResourceQuery(
-                        filterTopicIds = setOf(
-                            sampleTopic1.id,
-                        ),
-                    ),
-                )
+        test("when filtered by topic id matching news resources are returned") {
+            val userNewsResources = userNewsResourceRepository.observeAll(
+                NewsResourceQuery(filterTopicIds = setOf(sampleTopic1.id)),
+            )
 
-            // Send test data into the repositories.
             newsRepository.sendNewsResources(sampleNewsResources)
             userDataRepository.setUserData(emptyUserData)
 
-            // Check that only news resources with the given topic id are returned.
             assertEquals(
                 sampleNewsResources
                     .filter { sampleTopic1 in it.topics }
@@ -90,22 +73,16 @@ val CompositeUserNewsResourceRepositoryTest by testSuite {
                 userNewsResources.first(),
             )
         }
-    }
 
-    test("when filtered by followed topics matching news resources are returned") {
-        with(fixture) {
-            // Obtain a stream of user news resources for the given topic id.
-            val userNewsResources =
-                userNewsResourceRepository.observeAllForFollowedTopics()
+        test("when filtered by followed topics matching news resources are returned") {
+            val userNewsResources = userNewsResourceRepository.observeAllForFollowedTopics()
 
-            // Send test data into the repositories.
             val userData = emptyUserData.copy(
                 followedTopics = setOf(sampleTopic1.id),
             )
             newsRepository.sendNewsResources(sampleNewsResources)
             userDataRepository.setUserData(userData)
 
-            // Check that only news resources with the given topic id are returned.
             assertEquals(
                 sampleNewsResources
                     .filter { sampleTopic1 in it.topics }
@@ -113,25 +90,18 @@ val CompositeUserNewsResourceRepositoryTest by testSuite {
                 userNewsResources.first(),
             )
         }
-    }
 
-    test("when filtered by bookmarked resources matching news resources are returned") {
-        with(fixture) {
-            // Obtain the bookmarked user news resources flow.
+        test("when filtered by bookmarked resources matching news resources are returned") {
             val userNewsResources = userNewsResourceRepository.observeAllBookmarked()
 
-            // Send some news resources and user data into the data repositories.
             newsRepository.sendNewsResources(sampleNewsResources)
 
-            // Construct the test user data with bookmarks and followed topics.
             val userData = emptyUserData.copy(
                 bookmarkedNewsResources = setOf(sampleNewsResources[0].id, sampleNewsResources[2].id),
                 followedTopics = setOf(sampleTopic1.id),
             )
-
             userDataRepository.setUserData(userData)
 
-            // Check that the correct news resources are returned with their bookmarked state.
             assertEquals(
                 listOf(sampleNewsResources[0], sampleNewsResources[2]).mapToUserNewsResources(userData),
                 userNewsResources.first(),
