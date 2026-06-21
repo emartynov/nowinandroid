@@ -17,15 +17,12 @@
 package com.google.samples.apps.nowinandroid.core.common.result
 
 import app.cash.turbine.test
+import de.infix.testBalloon.framework.testSuite
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
 import kotlin.test.assertEquals
 
-class ResultKtTest {
-
-    @Test
-    fun Result_catches_errors() = runTest {
+val ResultKtTest by testSuite {
+    test("Result catches errors") {
         flow {
             emit(1)
             throw Exception("Test Done")

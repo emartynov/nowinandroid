@@ -21,14 +21,12 @@ import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
+import de.infix.testBalloon.framework.testSuite
 import kotlinx.datetime.Instant
-import org.junit.Test
 import kotlin.test.assertEquals
 
-class NetworkEntityTest {
-
-    @Test
-    fun networkTopicMapsToDatabaseModel() {
+val NetworkEntityTest by testSuite {
+    test("network topic maps to database model") {
         val networkModel = NetworkTopic(
             id = "0",
             name = "Test",
@@ -47,18 +45,16 @@ class NetworkEntityTest {
         assertEquals("image URL", entity.imageUrl)
     }
 
-    @Test
-    fun networkNewsResourceMapsToDatabaseModel() {
-        val networkModel =
-            NetworkNewsResource(
-                id = "0",
-                title = "title",
-                content = "content",
-                url = "url",
-                headerImageUrl = "headerImageUrl",
-                publishDate = Instant.fromEpochMilliseconds(1),
-                type = "Article 📚",
-            )
+    test("network news resource maps to database model") {
+        val networkModel = NetworkNewsResource(
+            id = "0",
+            title = "title",
+            content = "content",
+            url = "url",
+            headerImageUrl = "headerImageUrl",
+            publishDate = Instant.fromEpochMilliseconds(1),
+            type = "Article 📚",
+        )
         val entity = networkModel.asEntity()
 
         assertEquals("0", entity.id)
@@ -70,8 +66,7 @@ class NetworkEntityTest {
         assertEquals("Article 📚", entity.type)
     }
 
-    @Test
-    fun networkTopicMapsToExternalModel() {
+    test("network topic maps to external model") {
         val networkTopic = NetworkTopic(
             id = "0",
             name = "Test",
@@ -80,7 +75,6 @@ class NetworkEntityTest {
             url = "URL",
             imageUrl = "imageUrl",
         )
-
         val expected = Topic(
             id = "0",
             name = "Test",
@@ -89,12 +83,10 @@ class NetworkEntityTest {
             url = "URL",
             imageUrl = "imageUrl",
         )
-
         assertEquals(expected, networkTopic.asExternalModel())
     }
 
-    @Test
-    fun networkNewsResourceMapsToExternalModel() {
+    test("network news resource maps to external model") {
         val networkNewsResource = NetworkNewsResource(
             id = "0",
             title = "title",
@@ -105,7 +97,6 @@ class NetworkEntityTest {
             type = "Article 📚",
             topics = listOf("1", "2"),
         )
-
         val networkTopics = listOf(
             NetworkTopic(
                 id = "1",
@@ -124,7 +115,6 @@ class NetworkEntityTest {
                 imageUrl = "imageUrl 2",
             ),
         )
-
         val expected = NewsResource(
             id = "0",
             title = "title",

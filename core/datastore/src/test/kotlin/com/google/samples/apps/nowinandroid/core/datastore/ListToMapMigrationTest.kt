@@ -16,15 +16,13 @@
 
 package com.google.samples.apps.nowinandroid.core.datastore
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
+import de.infix.testBalloon.framework.testSuite
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class ListToMapMigrationTest {
+val ListToMapMigrationTest by testSuite {
 
-    @Test
-    fun ListToMapMigration_should_migrate_topic_ids() = runTest {
+    test("ListToMapMigration_should_migrate_topic_ids") {
         // Set up existing preferences with topic ids
         val preMigrationUserPreferences = userPreferences {
             deprecatedFollowedTopicIds.addAll(listOf("1", "2", "3"))
@@ -49,8 +47,7 @@ class ListToMapMigrationTest {
         assertTrue(postMigrationUserPreferences.hasDoneListToMapMigration)
     }
 
-    @Test
-    fun ListToMapMigration_should_migrate_author_ids() = runTest {
+    test("ListToMapMigration_should_migrate_author_ids") {
         // Set up existing preferences with author ids
         val preMigrationUserPreferences = userPreferences {
             deprecatedFollowedAuthorIds.addAll(listOf("4", "5", "6"))
@@ -75,8 +72,7 @@ class ListToMapMigrationTest {
         assertTrue(postMigrationUserPreferences.hasDoneListToMapMigration)
     }
 
-    @Test
-    fun ListToMapMigration_should_migrate_bookmarks() = runTest {
+    test("ListToMapMigration_should_migrate_bookmarks") {
         // Set up existing preferences with bookmarks
         val preMigrationUserPreferences = userPreferences {
             deprecatedBookmarkedNewsResourceIds.addAll(listOf("7", "8", "9"))

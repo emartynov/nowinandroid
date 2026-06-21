@@ -25,56 +25,54 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaIconT
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class IconButtonScreenshotTests {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun iconButton_multipleThemes() {
-        composeTestRule.captureMultiTheme("IconButton") {
-            NiaIconToggleExample(false)
+val IconButtonScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun iconButton_unchecked_multipleThemes() {
-        composeTestRule.captureMultiTheme("IconButton", "IconButtonUnchecked") {
-            Surface {
-                NiaIconToggleExample(true)
+        test("icon button multiple themes") {
+            composeTestRule.captureMultiTheme("IconButton") {
+                NiaIconToggleExample(false)
+            }
+        }
+
+        test("icon button unchecked multiple themes") {
+            composeTestRule.captureMultiTheme("IconButton", "IconButtonUnchecked") {
+                Surface {
+                    NiaIconToggleExample(true)
+                }
             }
         }
     }
+}
 
-    @Composable
-    private fun NiaIconToggleExample(checked: Boolean) {
-        NiaIconToggleButton(
-            checked = checked,
-            onCheckedChange = { },
-            icon = {
-                Icon(
-                    imageVector = NiaIcons.BookmarkBorder,
-                    contentDescription = null,
-                )
-            },
-            checkedIcon = {
-                Icon(
-                    imageVector = NiaIcons.Bookmark,
-                    contentDescription = null,
-                )
-            },
-        )
-    }
+@Composable
+private fun NiaIconToggleExample(checked: Boolean) {
+    NiaIconToggleButton(
+        checked = checked,
+        onCheckedChange = { },
+        icon = {
+            Icon(
+                imageVector = NiaIcons.BookmarkBorder,
+                contentDescription = null,
+            )
+        },
+        checkedIcon = {
+            Icon(
+                imageVector = NiaIcons.Bookmark,
+                contentDescription = null,
+            )
+        },
+    )
 }

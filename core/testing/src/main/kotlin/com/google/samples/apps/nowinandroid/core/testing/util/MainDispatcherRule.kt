@@ -16,6 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.testing.util
 
+import de.infix.testBalloon.framework.TestConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,4 +36,15 @@ class MainDispatcherRule(
     override fun starting(description: Description) = Dispatchers.setMain(testDispatcher)
 
     override fun finished(description: Description) = Dispatchers.resetMain()
+}
+
+/** testBalloon [TestConfig] equivalent of [MainDispatcherRule]. */
+val mainDispatcherTestConfig = TestConfig.aroundEachTest { action ->
+    val testDispatcher = UnconfinedTestDispatcher()
+    Dispatchers.setMain(testDispatcher)
+    try {
+        action()
+    } finally {
+        Dispatchers.resetMain()
+    }
 }

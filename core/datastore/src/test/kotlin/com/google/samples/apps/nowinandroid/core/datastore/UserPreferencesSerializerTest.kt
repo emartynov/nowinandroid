@@ -17,17 +17,16 @@
 package com.google.samples.apps.nowinandroid.core.datastore
 
 import androidx.datastore.core.CorruptionException
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
+import de.infix.testBalloon.framework.testSuite
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
-class UserPreferencesSerializerTest {
-    private val userPreferencesSerializer = UserPreferencesSerializer()
+val UserPreferencesSerializerTest by testSuite {
+    val userPreferencesSerializer = UserPreferencesSerializer()
 
-    @Test
-    fun defaultUserPreferences_isEmpty() {
+    test("defaultUserPreferences_isEmpty") {
         assertEquals(
             userPreferences {
                 // Default value
@@ -36,8 +35,7 @@ class UserPreferencesSerializerTest {
         )
     }
 
-    @Test
-    fun writingAndReadingUserPreferences_outputsCorrectValue() = runTest {
+    test("writingAndReadingUserPreferences_outputsCorrectValue") {
         val expectedUserPreferences = userPreferences {
             followedTopicIds.put("0", true)
             followedTopicIds.put("1", true)
@@ -57,8 +55,9 @@ class UserPreferencesSerializerTest {
         )
     }
 
-    @Test(expected = CorruptionException::class)
-    fun readingInvalidUserPreferences_throwsCorruptionException() = runTest {
-        userPreferencesSerializer.readFrom(ByteArrayInputStream(byteArrayOf(0)))
+    test("readingInvalidUserPreferences_throwsCorruptionException") {
+        assertFailsWith<CorruptionException> {
+            userPreferencesSerializer.readFrom(ByteArrayInputStream(byteArrayOf(0)))
+        }
     }
 }

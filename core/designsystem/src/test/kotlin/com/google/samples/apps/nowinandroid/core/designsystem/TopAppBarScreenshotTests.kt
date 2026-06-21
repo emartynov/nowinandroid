@@ -32,61 +32,59 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class TopAppBarScreenshotTests {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun topAppBar_multipleThemes() {
-        composeTestRule.captureMultiTheme("TopAppBar") {
-            NiaTopAppBarExample()
+val TopAppBarScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun topAppBar_hugeFont() {
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-            ) {
-                DeviceConfigurationOverride(
-                    DeviceConfigurationOverride.FontScale(2f),
+        test("top app bar multiple themes") {
+            composeTestRule.captureMultiTheme("TopAppBar") {
+                NiaTopAppBarExample()
+            }
+        }
+
+        test("top app bar huge font") {
+            composeTestRule.setContent {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
                 ) {
-                    NiaTheme {
-                        NiaTopAppBarExample()
+                    DeviceConfigurationOverride(
+                        DeviceConfigurationOverride.FontScale(2f),
+                    ) {
+                        NiaTheme {
+                            NiaTopAppBarExample()
+                        }
                     }
                 }
             }
+            composeTestRule.onRoot()
+                .captureRoboImage(
+                    "src/test/screenshots/TopAppBar/TopAppBar_fontScale2.png",
+                    roborazziOptions = DefaultRoborazziOptions,
+                )
         }
-        composeTestRule.onRoot()
-            .captureRoboImage(
-                "src/test/screenshots/TopAppBar/TopAppBar_fontScale2.png",
-                roborazziOptions = DefaultRoborazziOptions,
-            )
     }
+}
 
-    @Composable
-    private fun NiaTopAppBarExample() {
-        NiaTopAppBar(
-            titleRes = android.R.string.untitled,
-            navigationIcon = NiaIcons.Search,
-            navigationIconContentDescription = "Navigation icon",
-            actionIcon = NiaIcons.MoreVert,
-            actionIconContentDescription = "Action icon",
-        )
-    }
+@Composable
+private fun NiaTopAppBarExample() {
+    NiaTopAppBar(
+        titleRes = android.R.string.untitled,
+        navigationIcon = NiaIcons.Search,
+        navigationIconContentDescription = "Navigation icon",
+        actionIcon = NiaIcons.MoreVert,
+        actionIconContentDescription = "Action icon",
+    )
 }

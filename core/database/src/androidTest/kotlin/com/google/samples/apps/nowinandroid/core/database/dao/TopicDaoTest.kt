@@ -16,111 +16,92 @@
 
 package com.google.samples.apps.nowinandroid.core.database.dao
 
-import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
+import de.infix.testBalloon.framework.testSuite
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
 import kotlin.test.assertEquals
 
-internal class TopicDaoTest : DatabaseTest() {
+internal val TopicDaoTest by testSuite {
+    niaDbFixture() asContextForEach {
+        suspend fun insertTopics() {
+            val topicEntities = listOf(
+                testTopicEntity("1", "compose"),
+                testTopicEntity("2", "performance"),
+                testTopicEntity("3", "headline"),
+            )
+            topicDao.insertOrIgnoreTopics(topicEntities)
+        }
 
-    @Test
-    fun getTopics() = runTest {
-        insertTopics()
+        test("getTopics") {
+            insertTopics()
 
-        val savedTopics = topicDao.getTopicEntities().first()
+            val savedTopics = topicDao.getTopicEntities().first()
 
-        assertEquals(
-            listOf("1", "2", "3"),
-            savedTopics.map { it.id },
-        )
-    }
+            assertEquals(
+                listOf("1", "2", "3"),
+                savedTopics.map { it.id },
+            )
+        }
 
-    @Test
-    fun getTopic() = runTest {
-        insertTopics()
+        test("getTopic") {
+            insertTopics()
 
-        val savedTopicEntity = topicDao.getTopicEntity("2").first()
+            val savedTopicEntity = topicDao.getTopicEntity("2").first()
 
-        assertEquals("performance", savedTopicEntity.name)
-    }
+            assertEquals("performance", savedTopicEntity.name)
+        }
 
-    @Test
-    fun getTopics_oneOff() = runTest {
-        insertTopics()
+        test("getTopics_oneOff") {
+            insertTopics()
 
-        val savedTopics = topicDao.getOneOffTopicEntities()
+            val savedTopics = topicDao.getOneOffTopicEntities()
 
-        assertEquals(
-            listOf("1", "2", "3"),
-            savedTopics.map { it.id },
-        )
-    }
+            assertEquals(
+                listOf("1", "2", "3"),
+                savedTopics.map { it.id },
+            )
+        }
 
-    @Test
-    fun getTopics_byId() = runTest {
-        insertTopics()
+        test("getTopics_byId") {
+            insertTopics()
 
-        val savedTopics = topicDao.getTopicEntities(setOf("1", "2"))
-            .first()
+            val savedTopics = topicDao.getTopicEntities(setOf("1", "2"))
+                .first()
 
-        assertEquals(listOf("compose", "performance"), savedTopics.map { it.name })
-    }
+            assertEquals(listOf("compose", "performance"), savedTopics.map { it.name })
+        }
 
-    @Test
-    fun insertTopic_newEntryIsIgnoredIfAlreadyExists() = runTest {
-        insertTopics()
-        topicDao.insertOrIgnoreTopics(
-            listOf(testTopicEntity("1", "compose")),
-        )
+        test("insertTopic_newEntryIsIgnoredIfAlreadyExists") {
+            insertTopics()
+            topicDao.insertOrIgnoreTopics(
+                listOf(testTopicEntity("1", "compose")),
+            )
 
-        val savedTopics = topicDao.getOneOffTopicEntities()
+            val savedTopics = topicDao.getOneOffTopicEntities()
 
-        assertEquals(3, savedTopics.size)
-    }
+            assertEquals(3, savedTopics.size)
+        }
 
-    @Test
-    fun upsertTopic_existingEntryIsUpdated() = runTest {
-        insertTopics()
-        topicDao.upsertTopics(
-            listOf(testTopicEntity("1", "newName")),
-        )
+        test("upsertTopic_existingEntryIsUpdated") {
+            insertTopics()
+            topicDao.upsertTopics(
+                listOf(testTopicEntity("1", "newName")),
+            )
 
-        val savedTopics = topicDao.getOneOffTopicEntities()
+            val savedTopics = topicDao.getOneOffTopicEntities()
 
-        assertEquals(3, savedTopics.size)
-        assertEquals("newName", savedTopics.first().name)
-    }
+            assertEquals(3, savedTopics.size)
+            assertEquals("newName", savedTopics.first().name)
+        }
 
-    @Test
-    fun deleteTopics_byId_existingEntriesAreDeleted() = runTest {
-        insertTopics()
-        topicDao.deleteTopics(listOf("1", "2"))
+        test("deleteTopics_byId_existingEntriesAreDeleted") {
+            insertTopics()
+            topicDao.deleteTopics(listOf("1", "2"))
 
-        val savedTopics = topicDao.getOneOffTopicEntities()
+            val savedTopics = topicDao.getOneOffTopicEntities()
 
-        assertEquals(1, savedTopics.size)
-        assertEquals("3", savedTopics.first().id)
-    }
-
-    private suspend fun insertTopics() {
-        val topicEntities = listOf(
-            testTopicEntity("1", "compose"),
-            testTopicEntity("2", "performance"),
-            testTopicEntity("3", "headline"),
-        )
-        topicDao.insertOrIgnoreTopics(topicEntities)
+            assertEquals(1, savedTopics.size)
+            assertEquals("3", savedTopics.first().id)
+        }
     }
 }
 
-private fun testTopicEntity(
-    id: String = "0",
-    name: String,
-) = TopicEntity(
-    id = id,
-    name = name,
-    shortDescription = "",
-    longDescription = "",
-    url = "",
-    imageUrl = "",
-)

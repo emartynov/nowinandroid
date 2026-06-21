@@ -16,18 +16,16 @@
 
 package com.google.samples.apps.nowinandroid.core.datastore
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
+import de.infix.testBalloon.framework.testSuite
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
  * Unit test for [IntToStringIdsMigration]
  */
-class IntToStringIdsMigrationTest {
+val IntToStringIdsMigrationTest by testSuite {
 
-    @Test
-    fun IntToStringIdsMigration_should_migrate_topic_ids() = runTest {
+    test("IntToStringIdsMigration_should_migrate_topic_ids") {
         // Set up existing preferences with topic int ids
         val preMigrationUserPreferences = userPreferences {
             deprecatedIntFollowedTopicIds.addAll(listOf(1, 2, 3))
@@ -55,8 +53,7 @@ class IntToStringIdsMigrationTest {
         assertTrue(postMigrationUserPreferences.hasDoneIntToStringIdMigration)
     }
 
-    @Test
-    fun IntToStringIdsMigration_should_migrate_author_ids() = runTest {
+    test("IntToStringIdsMigration_should_migrate_author_ids") {
         // Set up existing preferences with author int ids
         val preMigrationUserPreferences = userPreferences {
             deprecatedIntFollowedAuthorIds.addAll(listOf(4, 5, 6))

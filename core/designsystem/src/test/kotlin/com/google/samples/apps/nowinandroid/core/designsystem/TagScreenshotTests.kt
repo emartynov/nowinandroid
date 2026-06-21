@@ -30,53 +30,51 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class TagScreenshotTests {
+val TagScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+        }
+    } asContextForEach {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun Tag_multipleThemes() {
-        composeTestRule.captureMultiTheme("Tag") {
-            NiaTopicTag(followed = true, onClick = {}) {
-                Text("TOPIC")
+        test("tag multiple themes") {
+            composeTestRule.captureMultiTheme("Tag") {
+                NiaTopicTag(followed = true, onClick = {}) {
+                    Text("TOPIC")
+                }
             }
         }
-    }
 
-    @Test
-    fun tag_hugeFont() {
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-            ) {
-                DeviceConfigurationOverride(
-                    DeviceConfigurationOverride.Companion.FontScale(2f),
+        test("tag huge font") {
+            composeTestRule.setContent {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
                 ) {
-                    NiaTheme {
-                        NiaTopicTag(followed = true, onClick = {}) {
-                            Text("LOOOOONG TOPIC")
+                    DeviceConfigurationOverride(
+                        DeviceConfigurationOverride.Companion.FontScale(2f),
+                    ) {
+                        NiaTheme {
+                            NiaTopicTag(followed = true, onClick = {}) {
+                                Text("LOOOOONG TOPIC")
+                            }
                         }
                     }
                 }
             }
+            composeTestRule.onRoot()
+                .captureRoboImage(
+                    "src/test/screenshots/Tag/Tag_fontScale2.png",
+                    roborazziOptions = DefaultRoborazziOptions,
+                )
         }
-        composeTestRule.onRoot()
-            .captureRoboImage(
-                "src/test/screenshots/Tag/Tag_fontScale2.png",
-                roborazziOptions = DefaultRoborazziOptions,
-            )
     }
 }

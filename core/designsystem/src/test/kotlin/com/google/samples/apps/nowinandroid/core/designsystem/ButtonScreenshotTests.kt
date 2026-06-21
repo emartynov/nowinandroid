@@ -26,54 +26,51 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaOutli
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class ButtonScreenshotTests {
+val ButtonScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+        }
+    } asContextForEach {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun niaButton_multipleThemes() {
-        composeTestRule.captureMultiTheme("Button") { description ->
-            Surface {
-                NiaButton(onClick = {}, text = { Text("$description Button") })
+        test("nia button multiple themes") {
+            composeTestRule.captureMultiTheme("Button") { description ->
+                Surface {
+                    NiaButton(onClick = {}, text = { Text("$description Button") })
+                }
             }
         }
-    }
 
-    @Test
-    fun niaOutlineButton_multipleThemes() {
-        composeTestRule.captureMultiTheme("Button", "OutlineButton") { description ->
-            Surface {
-                NiaOutlinedButton(onClick = {}, text = { Text("$description OutlineButton") })
+        test("nia outline button multiple themes") {
+            composeTestRule.captureMultiTheme("Button", "OutlineButton") { description ->
+                Surface {
+                    NiaOutlinedButton(onClick = {}, text = { Text("$description OutlineButton") })
+                }
             }
         }
-    }
 
-    @Test
-    fun niaButton_leadingIcon_multipleThemes() {
-        composeTestRule.captureMultiTheme(
-            name = "Button",
-            overrideFileName = "ButtonLeadingIcon",
-            shouldCompareAndroidTheme = false,
-        ) { description ->
-            Surface {
-                NiaButton(
-                    onClick = {},
-                    text = { Text("$description Icon Button") },
-                    leadingIcon = { Icon(imageVector = NiaIcons.Add, contentDescription = null) },
-                )
+        test("nia button leading icon multiple themes") {
+            composeTestRule.captureMultiTheme(
+                name = "Button",
+                overrideFileName = "ButtonLeadingIcon",
+                shouldCompareAndroidTheme = false,
+            ) { description ->
+                Surface {
+                    NiaButton(
+                        onClick = {},
+                        text = { Text("$description Icon Button") },
+                        leadingIcon = { Icon(imageVector = NiaIcons.Add, contentDescription = null) },
+                    )
+                }
             }
         }
     }

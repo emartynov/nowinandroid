@@ -35,77 +35,75 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class NavigationScreenshotTests {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun navigation_multipleThemes() {
-        composeTestRule.captureMultiTheme("Navigation") {
-            Surface {
-                NiaNavigationBarExample()
-            }
+val NavigationScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun navigation_hugeFont() {
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-            ) {
-                DeviceConfigurationOverride(
-                    DeviceConfigurationOverride.FontScale(2f),
-                ) {
-                    NiaTheme {
-                        NiaNavigationBarExample("Looong item")
-                    }
+        test("navigation multiple themes") {
+            composeTestRule.captureMultiTheme("Navigation") {
+                Surface {
+                    NiaNavigationBarExample()
                 }
             }
         }
-        composeTestRule.onRoot()
-            .captureRoboImage(
-                "src/test/screenshots/Navigation" +
-                    "/Navigation_fontScale2.png",
-                roborazziOptions = DefaultRoborazziOptions,
-            )
-    }
 
-    @Composable
-    private fun NiaNavigationBarExample(label: String = "Item") {
-        NiaNavigationBar {
-            (0..2).forEach { index ->
-                NiaNavigationBarItem(
-                    icon = {
-                        Icon(
-                            imageVector = NiaIcons.UpcomingBorder,
-                            contentDescription = "",
-                        )
-                    },
-                    selectedIcon = {
-                        Icon(
-                            imageVector = NiaIcons.Upcoming,
-                            contentDescription = "",
-                        )
-                    },
-                    label = { Text(label) },
-                    selected = index == 0,
-                    onClick = { },
-                )
+        test("navigation huge font") {
+            composeTestRule.setContent {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
+                ) {
+                    DeviceConfigurationOverride(
+                        DeviceConfigurationOverride.FontScale(2f),
+                    ) {
+                        NiaTheme {
+                            NiaNavigationBarExample("Looong item")
+                        }
+                    }
+                }
             }
+            composeTestRule.onRoot()
+                .captureRoboImage(
+                    "src/test/screenshots/Navigation" +
+                        "/Navigation_fontScale2.png",
+                    roborazziOptions = DefaultRoborazziOptions,
+                )
+        }
+    }
+}
+
+@Composable
+private fun NiaNavigationBarExample(label: String = "Item") {
+    NiaNavigationBar {
+        (0..2).forEach { index ->
+            NiaNavigationBarItem(
+                icon = {
+                    Icon(
+                        imageVector = NiaIcons.UpcomingBorder,
+                        contentDescription = "",
+                    )
+                },
+                selectedIcon = {
+                    Icon(
+                        imageVector = NiaIcons.Upcoming,
+                        contentDescription = "",
+                    )
+                },
+                label = { Text(label) },
+                selected = index == 0,
+                onClick = { },
+            )
         }
     }
 }

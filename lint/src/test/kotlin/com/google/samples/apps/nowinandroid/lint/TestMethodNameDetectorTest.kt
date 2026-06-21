@@ -21,12 +21,11 @@ import com.android.tools.lint.checks.infrastructure.TestFiles.kotlin
 import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
 import com.google.samples.apps.nowinandroid.lint.TestMethodNameDetector.Companion.FORMAT
 import com.google.samples.apps.nowinandroid.lint.TestMethodNameDetector.Companion.PREFIX
-import org.junit.Test
+import de.infix.testBalloon.framework.testSuite
 
-class TestMethodNameDetectorTest {
+val TestMethodNameDetectorTest by testSuite {
 
-    @Test
-    fun `detect prefix`() {
+    test("detect prefix") {
         lint().issues(PREFIX)
             .files(
                 JUNIT_TEST_STUB,
@@ -70,8 +69,7 @@ class TestMethodNameDetectorTest {
             )
     }
 
-    @Test
-    fun `detect format`() {
+    test("detect format") {
         lint().issues(FORMAT)
             .files(
                 JUNIT_TEST_STUB,
@@ -111,13 +109,11 @@ class TestMethodNameDetectorTest {
                 """.trimIndent(),
             )
     }
-
-    private companion object {
-        private val JUNIT_TEST_STUB: TestFile = kotlin(
-            """
-                package org.junit
-                annotation class Test
-                """,
-        ).indented()
-    }
 }
+
+private val JUNIT_TEST_STUB: TestFile = kotlin(
+    """
+        package org.junit
+        annotation class Test
+        """,
+).indented()

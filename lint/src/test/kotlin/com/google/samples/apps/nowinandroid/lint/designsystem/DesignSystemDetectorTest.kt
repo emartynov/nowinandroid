@@ -22,12 +22,11 @@ import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
 import com.google.samples.apps.nowinandroid.lint.designsystem.DesignSystemDetector.Companion.ISSUE
 import com.google.samples.apps.nowinandroid.lint.designsystem.DesignSystemDetector.Companion.METHOD_NAMES
 import com.google.samples.apps.nowinandroid.lint.designsystem.DesignSystemDetector.Companion.RECEIVER_NAMES
-import org.junit.Test
+import de.infix.testBalloon.framework.testSuite
 
-class DesignSystemDetectorTest {
+val DesignSystemDetectorTest by testSuite {
 
-    @Test
-    fun `detect replacements of Composable`() {
+    test("detect replacements of Composable") {
         lint()
             .issues(ISSUE)
             .allowMissingSdk()
@@ -114,8 +113,7 @@ class DesignSystemDetectorTest {
             )
     }
 
-    @Test
-    fun `detect replacements of Receiver`() {
+    test("detect replacements of Receiver") {
         lint()
             .issues(ISSUE)
             .allowMissingSdk()
@@ -141,24 +139,21 @@ class DesignSystemDetectorTest {
                 """.trimIndent(),
             )
     }
-
-    private companion object {
-
-        private val COMPOSABLE_STUB: TestFile = kotlin(
-            """
-            package androidx.compose.runtime
-            annotation class Composable
-            """.trimIndent(),
-        ).indented()
-
-        private val STUBS: TestFile = kotlin(
-            """
-            |import androidx.compose.runtime.Composable
-            |
-            ${METHOD_NAMES.keys.joinToString("\n") { "|@Composable fun $it() = {}" }}
-            ${RECEIVER_NAMES.keys.joinToString("\n") { "|object $it" }}
-            |
-            """.trimMargin(),
-        ).indented()
-    }
 }
+
+private val COMPOSABLE_STUB: TestFile = kotlin(
+    """
+    package androidx.compose.runtime
+    annotation class Composable
+    """.trimIndent(),
+).indented()
+
+private val STUBS: TestFile = kotlin(
+    """
+    |import androidx.compose.runtime.Composable
+    |
+    ${METHOD_NAMES.keys.joinToString("\n") { "|@Composable fun $it() = {}" }}
+    ${RECEIVER_NAMES.keys.joinToString("\n") { "|object $it" }}
+    |
+    """.trimMargin(),
+).indented()

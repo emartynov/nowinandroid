@@ -33,64 +33,62 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class, qualifiers = "480dpi")
 @LooperMode(LooperMode.Mode.PAUSED)
-class TabsScreenshotTests {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun tabs_multipleThemes() {
-        composeTestRule.captureMultiTheme("Tabs") {
-            NiaTabsExample()
+val TabsScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun tabs_hugeFont() {
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-            ) {
-                DeviceConfigurationOverride(
-                    DeviceConfigurationOverride.FontScale(2f),
+        test("tabs multiple themes") {
+            composeTestRule.captureMultiTheme("Tabs") {
+                NiaTabsExample()
+            }
+        }
+
+        test("tabs huge font") {
+            composeTestRule.setContent {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
                 ) {
-                    NiaTheme {
-                        NiaTabsExample("Looooong item")
+                    DeviceConfigurationOverride(
+                        DeviceConfigurationOverride.FontScale(2f),
+                    ) {
+                        NiaTheme {
+                            NiaTabsExample("Looooong item")
+                        }
                     }
                 }
             }
+            composeTestRule.onRoot()
+                .captureRoboImage(
+                    "src/test/screenshots/Tabs/Tabs_fontScale2.png",
+                    roborazziOptions = DefaultRoborazziOptions,
+                )
         }
-        composeTestRule.onRoot()
-            .captureRoboImage(
-                "src/test/screenshots/Tabs/Tabs_fontScale2.png",
-                roborazziOptions = DefaultRoborazziOptions,
-            )
     }
+}
 
-    @Composable
-    private fun NiaTabsExample(label: String = "Topics") {
-        Surface {
-            val titles = listOf(label, "People")
-            NiaTabRow(selectedTabIndex = 0) {
-                titles.forEachIndexed { index, title ->
-                    NiaTab(
-                        selected = index == 0,
-                        onClick = { },
-                        text = { Text(text = title) },
-                    )
-                }
+@Composable
+private fun NiaTabsExample(label: String = "Topics") {
+    Surface {
+        val titles = listOf(label, "People")
+        NiaTabRow(selectedTabIndex = 0) {
+            titles.forEachIndexed { index, title ->
+                NiaTab(
+                    selected = index == 0,
+                    onClick = { },
+                    text = { Text(text = title) },
+                )
             }
         }
     }

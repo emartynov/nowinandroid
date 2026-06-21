@@ -21,66 +21,46 @@ import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
-import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.testing.util.mainDispatcherTestConfig
+import de.infix.testBalloon.framework.testSuite
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.Test
 import kotlin.test.assertEquals
 
-class GetFollowableTopicsUseCaseTest {
+val GetFollowableTopicsUseCaseTest by testSuite(testConfig = mainDispatcherTestConfig) {
+    testFixture {
+        object {
+            val topicsRepository = TestTopicsRepository()
+            val userDataRepository = TestUserDataRepository()
+            val useCase = GetFollowableTopicsUseCase(topicsRepository, userDataRepository)
+        }
+    } asContextForEach {
+        test("when no params followable topics are returned with no sorting") {
+            val followableTopics = useCase()
 
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+            topicsRepository.sendTopics(testTopics)
+            userDataRepository.setFollowedTopicIds(setOf(testTopics[0].id, testTopics[2].id))
 
-    private val topicsRepository = TestTopicsRepository()
-    private val userDataRepository = TestUserDataRepository()
+            assertEquals(
+                listOf(
+                    FollowableTopic(testTopics[0], true),
+                    FollowableTopic(testTopics[1], false),
+                    FollowableTopic(testTopics[2], true),
+                ),
+                followableTopics.first(),
+            )
+        }
 
-    val useCase = GetFollowableTopicsUseCase(
-        topicsRepository,
-        userDataRepository,
-    )
+        test("when sort order is by name topics sorted by name are returned") {
+            val followableTopics = useCase(sortBy = NAME)
 
-    @Test
-    fun whenNoParams_followableTopicsAreReturnedWithNoSorting() = runTest {
-        // Obtain a stream of followable topics.
-        val followableTopics = useCase()
+            topicsRepository.sendTopics(testTopics)
+            userDataRepository.setFollowedTopicIds(setOf())
 
-        // Send some test topics and their followed state.
-        topicsRepository.sendTopics(testTopics)
-        userDataRepository.setFollowedTopicIds(setOf(testTopics[0].id, testTopics[2].id))
-
-        // Check that the order hasn't changed and that the correct topics are marked as followed.
-        assertEquals(
-            listOf(
-                FollowableTopic(testTopics[0], true),
-                FollowableTopic(testTopics[1], false),
-                FollowableTopic(testTopics[2], true),
-            ),
-            followableTopics.first(),
-        )
-    }
-
-    @Test
-    fun whenSortOrderIsByName_topicsSortedByNameAreReturned() = runTest {
-        // Obtain a stream of followable topics, sorted by name.
-        val followableTopics = useCase(
-            sortBy = NAME,
-        )
-
-        // Send some test topics and their followed state.
-        topicsRepository.sendTopics(testTopics)
-        userDataRepository.setFollowedTopicIds(setOf())
-
-        // Check that the followable topics are sorted by the topic name.
-        assertEquals(
-            followableTopics.first(),
-            testTopics
-                .sortedBy { it.name }
-                .map {
-                    FollowableTopic(it, false)
-                },
-        )
+            assertEquals(
+                followableTopics.first(),
+                testTopics.sortedBy { it.name }.map { FollowableTopic(it, false) },
+            )
+        }
     }
 }
 
