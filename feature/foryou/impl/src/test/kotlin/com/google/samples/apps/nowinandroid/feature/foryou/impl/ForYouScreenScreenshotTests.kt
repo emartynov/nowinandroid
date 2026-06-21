@@ -34,12 +34,9 @@ import com.google.samples.apps.nowinandroid.core.ui.UserNewsResourcePreviewParam
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.NotShown
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.Shown
 import dagger.hilt.android.testing.HiltTestApplication
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import org.hamcrest.Matchers
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
@@ -48,152 +45,32 @@ import java.util.TimeZone
 /**
  * Screenshot tests for the [ForYouScreen].
  */
-@RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = HiltTestApplication::class)
 @LooperMode(LooperMode.Mode.PAUSED)
-class ForYouScreenScreenshotTests {
+val ForYouScreenScreenshotTests by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+            val userNewsResources = UserNewsResourcePreviewParameterProvider().values.first()
 
-    /**
-     * Use a test activity to set the content on.
-     */
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+            init {
+                // Make time zone deterministic in tests
+                TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+            }
+        }
+    } asContextForEach {
 
-    private val userNewsResources = UserNewsResourcePreviewParameterProvider().values.first()
-
-    @Before
-    fun setTimeZone() {
-        // Make time zone deterministic in tests
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    }
-
-    @Test
-    fun forYouScreenPopulatedFeed() {
-        composeTestRule.captureMultiDevice("ForYouScreenPopulatedFeed") {
+        @Composable
+        fun ForYouScreenTopicSelection() {
             NiaTheme {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState = NotShown,
-                    feedState = Success(
-                        feed = userNewsResources,
-                    ),
-                    onTopicCheckedChanged = { _, _ -> },
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onTopicClick = {},
-                    deepLinkedUserNewsResource = null,
-                    onDeepLinkOpened = {},
-                )
-            }
-        }
-    }
-
-    @Test
-    fun forYouScreenLoading() {
-        composeTestRule.captureMultiDevice("ForYouScreenLoading") {
-            NiaTheme {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState = OnboardingUiState.Loading,
-                    feedState = NewsFeedUiState.Loading,
-                    onTopicCheckedChanged = { _, _ -> },
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onTopicClick = {},
-                    deepLinkedUserNewsResource = null,
-                    onDeepLinkOpened = {},
-                )
-            }
-        }
-    }
-
-    @Test
-    fun forYouScreenTopicSelection() {
-        composeTestRule.captureMultiDevice(
-            "ForYouScreenTopicSelection",
-            accessibilitySuppressions = Matchers.allOf(
-                AccessibilityCheckResultUtils.matchesCheck(TextContrastCheck::class.java),
-                Matchers.anyOf(
-                    // Disabled Button
-                    matchesElements(withText("Done")),
-
-                    // TODO investigate, seems a false positive
-                    matchesElements(withText("What are you interested in?")),
-                    matchesElements(withText("UI")),
-                ),
-            ),
-        ) {
-            ForYouScreenTopicSelection()
-        }
-    }
-
-    @Test
-    fun forYouScreenTopicSelection_dark() {
-        composeTestRule.captureForDevice(
-            deviceName = "phone_dark",
-            deviceSpec = DefaultTestDevices.PHONE.spec,
-            screenshotName = "ForYouScreenTopicSelection",
-            darkMode = true,
-        ) {
-            ForYouScreenTopicSelection()
-        }
-    }
-
-    @Test
-    fun forYouScreenPopulatedAndLoading() {
-        composeTestRule.captureMultiDevice("ForYouScreenPopulatedAndLoading") {
-            ForYouScreenPopulatedAndLoading()
-        }
-    }
-
-    @Test
-    fun forYouScreenPopulatedAndLoading_dark() {
-        composeTestRule.captureForDevice(
-            deviceName = "phone_dark",
-            deviceSpec = DefaultTestDevices.PHONE.spec,
-            screenshotName = "ForYouScreenPopulatedAndLoading",
-            darkMode = true,
-        ) {
-            ForYouScreenPopulatedAndLoading()
-        }
-    }
-
-    @Composable
-    private fun ForYouScreenTopicSelection() {
-        NiaTheme {
-            NiaBackground {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState = Shown(
-                        topics = userNewsResources.flatMap { news -> news.followableTopics }
-                            .distinctBy { it.topic.id },
-                    ),
-                    feedState = Success(
-                        feed = userNewsResources,
-                    ),
-                    onTopicCheckedChanged = { _, _ -> },
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onTopicClick = {},
-                    deepLinkedUserNewsResource = null,
-                    onDeepLinkOpened = {},
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun ForYouScreenPopulatedAndLoading() {
-        NiaTheme {
-            NiaBackground {
-                NiaTheme {
+                NiaBackground {
                     ForYouScreen(
-                        isSyncing = true,
-                        onboardingUiState = OnboardingUiState.Loading,
+                        isSyncing = false,
+                        onboardingUiState = Shown(
+                            topics = userNewsResources.flatMap { news -> news.followableTopics }
+                                .distinctBy { it.topic.id },
+                        ),
                         feedState = Success(
                             feed = userNewsResources,
                         ),
@@ -206,6 +83,117 @@ class ForYouScreenScreenshotTests {
                         onDeepLinkOpened = {},
                     )
                 }
+            }
+        }
+
+        @Composable
+        fun ForYouScreenPopulatedAndLoading() {
+            NiaTheme {
+                NiaBackground {
+                    NiaTheme {
+                        ForYouScreen(
+                            isSyncing = true,
+                            onboardingUiState = OnboardingUiState.Loading,
+                            feedState = Success(
+                                feed = userNewsResources,
+                            ),
+                            onTopicCheckedChanged = { _, _ -> },
+                            saveFollowedTopics = {},
+                            onNewsResourcesCheckedChanged = { _, _ -> },
+                            onNewsResourceViewed = {},
+                            onTopicClick = {},
+                            deepLinkedUserNewsResource = null,
+                            onDeepLinkOpened = {},
+                        )
+                    }
+                }
+            }
+        }
+
+        test("forYouScreenPopulatedFeed") {
+            composeTestRule.captureMultiDevice("ForYouScreenPopulatedFeed") {
+                NiaTheme {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState = NotShown,
+                        feedState = Success(
+                            feed = userNewsResources,
+                        ),
+                        onTopicCheckedChanged = { _, _ -> },
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onTopicClick = {},
+                        deepLinkedUserNewsResource = null,
+                        onDeepLinkOpened = {},
+                    )
+                }
+            }
+        }
+
+        test("forYouScreenLoading") {
+            composeTestRule.captureMultiDevice("ForYouScreenLoading") {
+                NiaTheme {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState = OnboardingUiState.Loading,
+                        feedState = NewsFeedUiState.Loading,
+                        onTopicCheckedChanged = { _, _ -> },
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onTopicClick = {},
+                        deepLinkedUserNewsResource = null,
+                        onDeepLinkOpened = {},
+                    )
+                }
+            }
+        }
+
+        test("forYouScreenTopicSelection") {
+            composeTestRule.captureMultiDevice(
+                "ForYouScreenTopicSelection",
+                accessibilitySuppressions = Matchers.allOf(
+                    AccessibilityCheckResultUtils.matchesCheck(TextContrastCheck::class.java),
+                    Matchers.anyOf(
+                        // Disabled Button
+                        matchesElements(withText("Done")),
+
+                        // TODO investigate, seems a false positive
+                        matchesElements(withText("What are you interested in?")),
+                        matchesElements(withText("UI")),
+                    ),
+                ),
+            ) {
+                ForYouScreenTopicSelection()
+            }
+        }
+
+        test("forYouScreenTopicSelection_dark") {
+            composeTestRule.captureForDevice(
+                deviceName = "phone_dark",
+                deviceSpec = DefaultTestDevices.PHONE.spec,
+                screenshotName = "ForYouScreenTopicSelection",
+                darkMode = true,
+            ) {
+                ForYouScreenTopicSelection()
+            }
+        }
+
+        test("forYouScreenPopulatedAndLoading") {
+            composeTestRule.captureMultiDevice("ForYouScreenPopulatedAndLoading") {
+                ForYouScreenPopulatedAndLoading()
+            }
+        }
+
+        test("forYouScreenPopulatedAndLoading_dark") {
+            composeTestRule.captureForDevice(
+                deviceName = "phone_dark",
+                deviceSpec = DefaultTestDevices.PHONE.spec,
+                screenshotName = "ForYouScreenPopulatedAndLoading",
+                darkMode = true,
+            ) {
+                ForYouScreenPopulatedAndLoading()
             }
         }
     }

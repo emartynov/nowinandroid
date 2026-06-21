@@ -23,19 +23,14 @@ import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
-import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.testing.util.mainDispatcherTestConfig
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsViewModel
+import de.infix.testBalloon.framework.testSuite
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 
@@ -49,103 +44,94 @@ import kotlin.test.assertEquals
  * TODO: Remove Robolectric if/when AndroidX Navigation API is updated to remove Android dependency.
  *  See https://issuetracker.google.com/340966212.
  */
-@RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class InterestsViewModelTest {
+val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
+    testFixture {
+        object {
+            val userDataRepository = TestUserDataRepository()
+            val topicsRepository = TestTopicsRepository()
+            val getFollowableTopicsUseCase = GetFollowableTopicsUseCase(
+                topicsRepository = topicsRepository,
+                userDataRepository = userDataRepository,
+            )
+            val viewModel = InterestsViewModel(
+                savedStateHandle = SavedStateHandle(
+                    route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
+                ),
+                userDataRepository = userDataRepository,
+                getFollowableTopics = getFollowableTopicsUseCase,
+                InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
+            )
+        }
+    } asContextForEach {
 
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+        test("uiState whenInitialized thenShowLoading") {
+            assertEquals(InterestsUiState.Loading, viewModel.uiState.value)
+        }
 
-    private val userDataRepository = TestUserDataRepository()
-    private val topicsRepository = TestTopicsRepository()
-    private val getFollowableTopicsUseCase = GetFollowableTopicsUseCase(
-        topicsRepository = topicsRepository,
-        userDataRepository = userDataRepository,
-    )
-    private lateinit var viewModel: InterestsViewModel
+        test("uiState whenFollowedTopicsAreLoading thenShowLoading") {
+            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
-    @Before
-    fun setup() {
-        viewModel = InterestsViewModel(
-            savedStateHandle = SavedStateHandle(
-                route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
-            ),
-            userDataRepository = userDataRepository,
-            getFollowableTopics = getFollowableTopicsUseCase,
-            InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
-        )
-    }
+            userDataRepository.setFollowedTopicIds(emptySet())
+            assertEquals(InterestsUiState.Loading, viewModel.uiState.value)
+        }
 
-    @Test
-    fun uiState_whenInitialized_thenShowLoading() = runTest {
-        assertEquals(InterestsUiState.Loading, viewModel.uiState.value)
-    }
+        test("uiState whenFollowingNewTopic thenShowUpdatedTopics") {
+            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
-    @Test
-    fun uiState_whenFollowedTopicsAreLoading_thenShowLoading() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            val toggleTopicId = testOutputTopics[1].topic.id
+            topicsRepository.sendTopics(testInputTopics.map { it.topic })
+            userDataRepository.setFollowedTopicIds(setOf(testInputTopics[0].topic.id))
 
-        userDataRepository.setFollowedTopicIds(emptySet())
-        assertEquals(InterestsUiState.Loading, viewModel.uiState.value)
-    }
+            assertEquals(
+                false,
+                (viewModel.uiState.value as InterestsUiState.Interests)
+                    .topics.first { it.topic.id == toggleTopicId }.isFollowed,
+            )
 
-    @Test
-    fun uiState_whenFollowingNewTopic_thenShowUpdatedTopics() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            viewModel.followTopic(
+                followedTopicId = toggleTopicId,
+                true,
+            )
 
-        val toggleTopicId = testOutputTopics[1].topic.id
-        topicsRepository.sendTopics(testInputTopics.map { it.topic })
-        userDataRepository.setFollowedTopicIds(setOf(testInputTopics[0].topic.id))
+            assertEquals(
+                InterestsUiState.Interests(
+                    topics = testOutputTopics,
+                    selectedTopicId = testInputTopics[0].topic.id,
+                ),
+                viewModel.uiState.value,
+            )
+        }
 
-        assertEquals(
-            false,
-            (viewModel.uiState.value as InterestsUiState.Interests)
-                .topics.first { it.topic.id == toggleTopicId }.isFollowed,
-        )
+        test("uiState whenUnfollowingTopics thenShowUpdatedTopics") {
+            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
-        viewModel.followTopic(
-            followedTopicId = toggleTopicId,
-            true,
-        )
+            val toggleTopicId = testOutputTopics[1].topic.id
 
-        assertEquals(
-            InterestsUiState.Interests(
-                topics = testOutputTopics,
-                selectedTopicId = testInputTopics[0].topic.id,
-            ),
-            viewModel.uiState.value,
-        )
-    }
+            topicsRepository.sendTopics(testOutputTopics.map { it.topic })
+            userDataRepository.setFollowedTopicIds(
+                setOf(testOutputTopics[0].topic.id, testOutputTopics[1].topic.id),
+            )
 
-    @Test
-    fun uiState_whenUnfollowingTopics_thenShowUpdatedTopics() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            assertEquals(
+                true,
+                (viewModel.uiState.value as InterestsUiState.Interests)
+                    .topics.first { it.topic.id == toggleTopicId }.isFollowed,
+            )
 
-        val toggleTopicId = testOutputTopics[1].topic.id
+            viewModel.followTopic(
+                followedTopicId = toggleTopicId,
+                false,
+            )
 
-        topicsRepository.sendTopics(testOutputTopics.map { it.topic })
-        userDataRepository.setFollowedTopicIds(
-            setOf(testOutputTopics[0].topic.id, testOutputTopics[1].topic.id),
-        )
-
-        assertEquals(
-            true,
-            (viewModel.uiState.value as InterestsUiState.Interests)
-                .topics.first { it.topic.id == toggleTopicId }.isFollowed,
-        )
-
-        viewModel.followTopic(
-            followedTopicId = toggleTopicId,
-            false,
-        )
-
-        assertEquals(
-            InterestsUiState.Interests(
-                topics = testInputTopics,
-                selectedTopicId = testInputTopics[0].topic.id,
-            ),
-            viewModel.uiState.value,
-        )
+            assertEquals(
+                InterestsUiState.Interests(
+                    topics = testInputTopics,
+                    selectedTopicId = testInputTopics[0].topic.id,
+                ),
+                viewModel.uiState.value,
+            )
+        }
     }
 }
 

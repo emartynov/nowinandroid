@@ -37,164 +37,161 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import com.google.samples.apps.nowinandroid.feature.bookmarks.api.R
-import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.Test
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
  * UI tests for [BookmarksScreen] composable.
  */
-class BookmarksScreenTest {
+val BookmarksScreenTest by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+        }
+    } asContextForEach {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+        test("loading_showsLoadingSpinner") {
+            composeTestRule.setContent {
+                BookmarksScreen(
+                    feedState = NewsFeedUiState.Loading,
+                    onShowSnackbar = { _, _ -> false },
+                    removeFromBookmarks = {},
+                    onTopicClick = {},
+                    onNewsResourceViewed = {},
+                )
+            }
 
-    @Test
-    fun loading_showsLoadingSpinner() {
-        composeTestRule.setContent {
-            BookmarksScreen(
-                feedState = NewsFeedUiState.Loading,
-                onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
-                onTopicClick = {},
-                onNewsResourceViewed = {},
-            )
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.resources.getString(R.string.feature_bookmarks_api_loading),
+                )
+                .assertExists()
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.resources.getString(R.string.feature_bookmarks_api_loading),
-            )
-            .assertExists()
-    }
+        test("feed_whenHasBookmarks_showsBookmarks") {
+            composeTestRule.setContent {
+                BookmarksScreen(
+                    feedState = NewsFeedUiState.Success(
+                        userNewsResourcesTestData.take(2),
+                    ),
+                    onShowSnackbar = { _, _ -> false },
+                    removeFromBookmarks = {},
+                    onTopicClick = {},
+                    onNewsResourceViewed = {},
+                )
+            }
 
-    @Test
-    fun feed_whenHasBookmarks_showsBookmarks() {
-        composeTestRule.setContent {
-            BookmarksScreen(
-                feedState = NewsFeedUiState.Success(
-                    userNewsResourcesTestData.take(2),
-                ),
-                onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
-                onTopicClick = {},
-                onNewsResourceViewed = {},
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText(
-                userNewsResourcesTestData[0].title,
-                substring = true,
-            )
-            .assertExists()
-            .assertHasClickAction()
-
-        composeTestRule.onNode(hasScrollToNodeAction())
-            .performScrollToNode(
-                hasText(
-                    userNewsResourcesTestData[1].title,
+            composeTestRule
+                .onNodeWithText(
+                    userNewsResourcesTestData[0].title,
                     substring = true,
-                ),
-            )
+                )
+                .assertExists()
+                .assertHasClickAction()
 
-        composeTestRule
-            .onNodeWithText(
-                userNewsResourcesTestData[1].title,
-                substring = true,
-            )
-            .assertExists()
-            .assertHasClickAction()
-    }
-
-    @Test
-    fun feed_whenRemovingBookmark_removesBookmark() {
-        var removeFromBookmarksCalled = false
-
-        composeTestRule.setContent {
-            BookmarksScreen(
-                feedState = NewsFeedUiState.Success(
-                    userNewsResourcesTestData.take(2),
-                ),
-                onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = { newsResourceId ->
-                    assertEquals(userNewsResourcesTestData[0].id, newsResourceId)
-                    removeFromBookmarksCalled = true
-                },
-                onTopicClick = {},
-                onNewsResourceViewed = {},
-            )
-        }
-
-        composeTestRule
-            .onAllNodesWithContentDescription(
-                composeTestRule.activity.getString(
-                    com.google.samples.apps.nowinandroid.core.ui.R.string.core_ui_unbookmark,
-                ),
-            ).filter(
-                hasAnyAncestor(
+            composeTestRule.onNode(hasScrollToNodeAction())
+                .performScrollToNode(
                     hasText(
-                        userNewsResourcesTestData[0].title,
+                        userNewsResourcesTestData[1].title,
                         substring = true,
                     ),
-                ),
-            )
-            .assertCountEquals(1)
-            .onFirst()
-            .performClick()
+                )
 
-        assertTrue(removeFromBookmarksCalled)
-    }
-
-    @Test
-    fun feed_whenHasNoBookmarks_showsEmptyState() {
-        composeTestRule.setContent {
-            BookmarksScreen(
-                feedState = NewsFeedUiState.Success(emptyList()),
-                onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
-                onTopicClick = {},
-                onNewsResourceViewed = {},
-            )
+            composeTestRule
+                .onNodeWithText(
+                    userNewsResourcesTestData[1].title,
+                    substring = true,
+                )
+                .assertExists()
+                .assertHasClickAction()
         }
 
-        composeTestRule
-            .onNodeWithText(
-                composeTestRule.activity.getString(R.string.feature_bookmarks_api_empty_error),
-            )
-            .assertExists()
+        test("feed_whenRemovingBookmark_removesBookmark") {
+            var removeFromBookmarksCalled = false
 
-        composeTestRule
-            .onNodeWithText(
-                composeTestRule.activity.getString(R.string.feature_bookmarks_api_empty_description),
-            )
-            .assertExists()
-    }
+            composeTestRule.setContent {
+                BookmarksScreen(
+                    feedState = NewsFeedUiState.Success(
+                        userNewsResourcesTestData.take(2),
+                    ),
+                    onShowSnackbar = { _, _ -> false },
+                    removeFromBookmarks = { newsResourceId ->
+                        assertEquals(userNewsResourcesTestData[0].id, newsResourceId)
+                        removeFromBookmarksCalled = true
+                    },
+                    onTopicClick = {},
+                    onNewsResourceViewed = {},
+                )
+            }
 
-    @Test
-    fun feed_whenLifecycleStops_undoBookmarkedStateIsCleared() = runTest {
-        var undoStateCleared = false
-        val testLifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.STARTED)
+            composeTestRule
+                .onAllNodesWithContentDescription(
+                    composeTestRule.activity.getString(
+                        com.google.samples.apps.nowinandroid.core.ui.R.string.core_ui_unbookmark,
+                    ),
+                ).filter(
+                    hasAnyAncestor(
+                        hasText(
+                            userNewsResourcesTestData[0].title,
+                            substring = true,
+                        ),
+                    ),
+                )
+                .assertCountEquals(1)
+                .onFirst()
+                .performClick()
 
-        composeTestRule.setContent {
-            CompositionLocalProvider(LocalLifecycleOwner provides testLifecycleOwner) {
+            assertTrue(removeFromBookmarksCalled)
+        }
+
+        test("feed_whenHasNoBookmarks_showsEmptyState") {
+            composeTestRule.setContent {
                 BookmarksScreen(
                     feedState = NewsFeedUiState.Success(emptyList()),
                     onShowSnackbar = { _, _ -> false },
                     removeFromBookmarks = {},
                     onTopicClick = {},
                     onNewsResourceViewed = {},
-                    clearUndoState = {
-                        undoStateCleared = true
-                    },
                 )
             }
+
+            composeTestRule
+                .onNodeWithText(
+                    composeTestRule.activity.getString(R.string.feature_bookmarks_api_empty_error),
+                )
+                .assertExists()
+
+            composeTestRule
+                .onNodeWithText(
+                    composeTestRule.activity.getString(R.string.feature_bookmarks_api_empty_description),
+                )
+                .assertExists()
         }
 
-        assertEquals(false, undoStateCleared)
-        testLifecycleOwner.handleLifecycleEvent(event = Lifecycle.Event.ON_STOP)
-        assertEquals(true, undoStateCleared)
+        test("feed_whenLifecycleStops_undoBookmarkedStateIsCleared") {
+            var undoStateCleared = false
+            val testLifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.STARTED)
+
+            composeTestRule.setContent {
+                CompositionLocalProvider(LocalLifecycleOwner provides testLifecycleOwner) {
+                    BookmarksScreen(
+                        feedState = NewsFeedUiState.Success(emptyList()),
+                        onShowSnackbar = { _, _ -> false },
+                        removeFromBookmarks = {},
+                        onTopicClick = {},
+                        onNewsResourceViewed = {},
+                        clearUndoState = {
+                            undoStateCleared = true
+                        },
+                    )
+                }
+            }
+
+            assertEquals(false, undoStateCleared)
+            testLifecycleOwner.handleLifecycleEvent(event = Lifecycle.Event.ON_STOP)
+            assertEquals(true, undoStateCleared)
+        }
     }
 }

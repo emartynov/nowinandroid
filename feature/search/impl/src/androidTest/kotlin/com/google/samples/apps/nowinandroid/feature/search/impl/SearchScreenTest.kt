@@ -37,189 +37,177 @@ import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTes
 import com.google.samples.apps.nowinandroid.core.testing.data.newsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.ui.R.string
 import com.google.samples.apps.nowinandroid.feature.search.api.R
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 
 /**
  * UI test for checking the correct behaviour of the Search screen.
  */
-class SearchScreenTest {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    private lateinit var clearSearchContentDesc: String
-    private lateinit var followButtonContentDesc: String
-    private lateinit var unfollowButtonContentDesc: String
-    private lateinit var clearRecentSearchesContentDesc: String
-    private lateinit var topicsString: String
-    private lateinit var updatesString: String
-    private lateinit var tryAnotherSearchString: String
-    private lateinit var searchNotReadyString: String
-
-    private val userData: UserData = UserData(
-        bookmarkedNewsResources = setOf("1", "3"),
-        viewedNewsResources = setOf("1", "2", "4"),
-        followedTopics = emptySet(),
-        themeBrand = ANDROID,
-        darkThemeConfig = DARK,
-        shouldHideOnboarding = true,
-        useDynamicColor = false,
-    )
-
-    @Before
-    fun setup() {
-        composeTestRule.activity.apply {
-            clearSearchContentDesc = getString(R.string.feature_search_api_clear_search_text_content_desc)
-            clearRecentSearchesContentDesc = getString(R.string.feature_search_api_clear_recent_searches_content_desc)
-            followButtonContentDesc =
-                getString(string.core_ui_interests_card_follow_button_content_desc)
-            unfollowButtonContentDesc =
-                getString(string.core_ui_interests_card_unfollow_button_content_desc)
-            topicsString = getString(R.string.feature_search_api_topics)
-            updatesString = getString(R.string.feature_search_api_updates)
-            tryAnotherSearchString = getString(R.string.feature_search_api_try_another_search) +
-                " " + getString(R.string.feature_search_api_interests) + " " + getString(R.string.feature_search_api_to_browse_topics)
-            searchNotReadyString = getString(R.string.feature_search_api_not_ready)
+val SearchScreenTest by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun searchTextField_isFocused() {
-        composeTestRule.setContent {
-            SearchScreen()
-        }
+        val clearSearchContentDesc =
+            composeTestRule.activity.getString(R.string.feature_search_api_clear_search_text_content_desc)
+        val clearRecentSearchesContentDesc =
+            composeTestRule.activity.getString(R.string.feature_search_api_clear_recent_searches_content_desc)
+        val followButtonContentDesc =
+            composeTestRule.activity.getString(string.core_ui_interests_card_follow_button_content_desc)
+        val unfollowButtonContentDesc =
+            composeTestRule.activity.getString(string.core_ui_interests_card_unfollow_button_content_desc)
+        val topicsString =
+            composeTestRule.activity.getString(R.string.feature_search_api_topics)
+        val updatesString =
+            composeTestRule.activity.getString(R.string.feature_search_api_updates)
+        val tryAnotherSearchString =
+            composeTestRule.activity.getString(R.string.feature_search_api_try_another_search) +
+                " " + composeTestRule.activity.getString(R.string.feature_search_api_interests) +
+                " " + composeTestRule.activity.getString(R.string.feature_search_api_to_browse_topics)
+        val searchNotReadyString =
+            composeTestRule.activity.getString(R.string.feature_search_api_not_ready)
 
-        composeTestRule
-            .onNodeWithTag("searchTextField")
-            .assertIsFocused()
-    }
+        val userData = UserData(
+            bookmarkedNewsResources = setOf("1", "3"),
+            viewedNewsResources = setOf("1", "2", "4"),
+            followedTopics = emptySet(),
+            themeBrand = ANDROID,
+            darkThemeConfig = DARK,
+            shouldHideOnboarding = true,
+            useDynamicColor = false,
+        )
 
-    @Test
-    fun emptySearchResult_emptyScreenIsDisplayed() {
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(),
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText(tryAnotherSearchString)
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun emptySearchResult_nonEmptyRecentSearches_emptySearchScreenAndRecentSearchesAreDisplayed() {
-        val recentSearches = listOf("kotlin")
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(),
-                recentSearchesUiState = RecentSearchQueriesUiState.Success(
-                    recentQueries = recentSearches.map(::RecentSearchQuery),
-                ),
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText(tryAnotherSearchString)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithContentDescription(clearRecentSearchesContentDesc)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText("kotlin")
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun searchResultWithTopics_allTopicsAreVisible_followButtonsVisibleForTheNumOfFollowedTopics() {
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(topics = followableTopicTestData),
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText(topicsString)
-            .assertIsDisplayed()
-
-        val scrollableNode = composeTestRule
-            .onAllNodes(hasScrollToNodeAction())
-            .onFirst()
-
-        followableTopicTestData.forEachIndexed { index, followableTopic ->
-            scrollableNode.performScrollToIndex(index)
+        test("searchTextField isFocused") {
+            composeTestRule.setContent {
+                SearchScreen()
+            }
 
             composeTestRule
-                .onNodeWithText(followableTopic.topic.name)
+                .onNodeWithTag("searchTextField")
+                .assertIsFocused()
+        }
+
+        test("emptySearchResult emptyScreenIsDisplayed") {
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.Success(),
+                )
+            }
+
+            composeTestRule
+                .onNodeWithText(tryAnotherSearchString)
                 .assertIsDisplayed()
         }
 
-        composeTestRule
-            .onAllNodesWithContentDescription(followButtonContentDesc)
-            .assertCountEquals(2)
-        composeTestRule
-            .onAllNodesWithContentDescription(unfollowButtonContentDesc)
-            .assertCountEquals(1)
-    }
+        test("emptySearchResult nonEmptyRecentSearches emptySearchScreenAndRecentSearchesAreDisplayed") {
+            val recentSearches = listOf("kotlin")
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.Success(),
+                    recentSearchesUiState = RecentSearchQueriesUiState.Success(
+                        recentQueries = recentSearches.map(::RecentSearchQuery),
+                    ),
+                )
+            }
 
-    @Test
-    fun searchResultWithNewsResources_firstNewsResourcesIsVisible() {
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(
-                    newsResources = newsResourcesTestData.map {
-                        UserNewsResource(
-                            newsResource = it,
-                            userData = userData,
-                        )
-                    },
-                ),
-            )
+            composeTestRule
+                .onNodeWithText(tryAnotherSearchString)
+                .assertIsDisplayed()
+            composeTestRule
+                .onNodeWithContentDescription(clearRecentSearchesContentDesc)
+                .assertIsDisplayed()
+            composeTestRule
+                .onNodeWithText("kotlin")
+                .assertIsDisplayed()
         }
 
-        composeTestRule
-            .onNodeWithText(updatesString)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText(newsResourcesTestData[0].title)
-            .assertIsDisplayed()
-    }
+        test("searchResultWithTopics allTopicsAreVisible followButtonsVisibleForTheNumOfFollowedTopics") {
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.Success(topics = followableTopicTestData),
+                )
+            }
 
-    @Test
-    fun emptyQuery_notEmptyRecentSearches_verifyClearSearchesButton_displayed() {
-        val recentSearches = listOf("kotlin", "testing")
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.EmptyQuery,
-                recentSearchesUiState = RecentSearchQueriesUiState.Success(
-                    recentQueries = recentSearches.map(::RecentSearchQuery),
-                ),
-            )
+            composeTestRule
+                .onNodeWithText(topicsString)
+                .assertIsDisplayed()
+
+            val scrollableNode = composeTestRule
+                .onAllNodes(hasScrollToNodeAction())
+                .onFirst()
+
+            followableTopicTestData.forEachIndexed { index, followableTopic ->
+                scrollableNode.performScrollToIndex(index)
+
+                composeTestRule
+                    .onNodeWithText(followableTopic.topic.name)
+                    .assertIsDisplayed()
+            }
+
+            composeTestRule
+                .onAllNodesWithContentDescription(followButtonContentDesc)
+                .assertCountEquals(2)
+            composeTestRule
+                .onAllNodesWithContentDescription(unfollowButtonContentDesc)
+                .assertCountEquals(1)
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(clearRecentSearchesContentDesc)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText("kotlin")
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText("testing")
-            .assertIsDisplayed()
-    }
+        test("searchResultWithNewsResources firstNewsResourcesIsVisible") {
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.Success(
+                        newsResources = newsResourcesTestData.map {
+                            UserNewsResource(
+                                newsResource = it,
+                                userData = userData,
+                            )
+                        },
+                    ),
+                )
+            }
 
-    @Test
-    fun searchNotReady_verifySearchNotReadyMessageIsVisible() {
-        composeTestRule.setContent {
-            SearchScreen(
-                searchResultUiState = SearchResultUiState.SearchNotReady,
-            )
+            composeTestRule
+                .onNodeWithText(updatesString)
+                .assertIsDisplayed()
+            composeTestRule
+                .onNodeWithText(newsResourcesTestData[0].title)
+                .assertIsDisplayed()
         }
 
-        composeTestRule
-            .onNodeWithText(searchNotReadyString)
-            .assertIsDisplayed()
+        test("emptyQuery notEmptyRecentSearches verifyClearSearchesButton displayed") {
+            val recentSearches = listOf("kotlin", "testing")
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.EmptyQuery,
+                    recentSearchesUiState = RecentSearchQueriesUiState.Success(
+                        recentQueries = recentSearches.map(::RecentSearchQuery),
+                    ),
+                )
+            }
+
+            composeTestRule
+                .onNodeWithContentDescription(clearRecentSearchesContentDesc)
+                .assertIsDisplayed()
+            composeTestRule
+                .onNodeWithText("kotlin")
+                .assertIsDisplayed()
+            composeTestRule
+                .onNodeWithText("testing")
+                .assertIsDisplayed()
+        }
+
+        test("searchNotReady verifySearchNotReadyMessageIsVisible") {
+            composeTestRule.setContent {
+                SearchScreen(
+                    searchResultUiState = SearchResultUiState.SearchNotReady,
+                )
+            }
+
+            composeTestRule
+                .onNodeWithText(searchNotReadyString)
+                .assertIsDisplayed()
+        }
     }
 }

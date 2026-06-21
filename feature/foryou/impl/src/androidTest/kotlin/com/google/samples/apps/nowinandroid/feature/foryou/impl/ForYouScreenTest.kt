@@ -33,204 +33,224 @@ import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTes
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import com.google.samples.apps.nowinandroid.feature.foryou.api.R
-import org.junit.Rule
-import org.junit.Test
+import de.infix.testBalloon.framework.JUnit4RulesContext
+import de.infix.testBalloon.framework.testSuite
 
-class ForYouScreenTest {
-
-    @get:Rule(order = 0)
-    val postNotificationsPermission = GrantPostNotificationsPermissionRule()
-
-    @get:Rule(order = 1)
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    private val doneButtonMatcher by lazy {
-        hasText(
-            composeTestRule.activity.resources.getString(R.string.feature_foryou_api_done),
-        )
-    }
-
-    @Test
-    fun circularProgressIndicator_whenScreenIsLoading_exists() {
-        composeTestRule.setContent {
-            Box {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState = OnboardingUiState.Loading,
-                    feedState = NewsFeedUiState.Loading,
-                    deepLinkedUserNewsResource = null,
-                    onTopicCheckedChanged = { _, _ -> },
-                    onTopicClick = {},
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onDeepLinkOpened = {},
-                )
-            }
+val ForYouScreenTest by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val postNotificationsPermission = rule(GrantPostNotificationsPermissionRule(), order = 0)
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>(), order = 1)
         }
+    } asContextForEach {
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
+        val doneButtonMatcher by lazy {
+            hasText(
+                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_done),
             )
-            .assertExists()
-    }
-
-    @Test
-    fun circularProgressIndicator_whenScreenIsSyncing_exists() {
-        composeTestRule.setContent {
-            Box {
-                ForYouScreen(
-                    isSyncing = true,
-                    onboardingUiState = OnboardingUiState.NotShown,
-                    feedState = NewsFeedUiState.Success(emptyList()),
-                    deepLinkedUserNewsResource = null,
-                    onTopicCheckedChanged = { _, _ -> },
-                    onTopicClick = {},
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onDeepLinkOpened = {},
-                )
-            }
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
-            )
-            .assertExists()
-    }
-
-    @Test
-    fun topicSelector_whenNoTopicsSelected_showsTopicChipsAndDisabledDoneButton() {
-        val testData = followableTopicTestData.map { it.copy(isFollowed = false) }
-
-        composeTestRule.setContent {
-            Box {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState = OnboardingUiState.Shown(
-                        topics = testData,
-                    ),
-                    feedState = NewsFeedUiState.Success(
-                        feed = emptyList(),
-                    ),
-                    deepLinkedUserNewsResource = null,
-                    onTopicCheckedChanged = { _, _ -> },
-                    onTopicClick = {},
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onDeepLinkOpened = {},
-                )
+        test("circularProgressIndicator_whenScreenIsLoading_exists") {
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState = OnboardingUiState.Loading,
+                        feedState = NewsFeedUiState.Loading,
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
             }
-        }
 
-        testData.forEach { testTopic ->
             composeTestRule
-                .onNodeWithText(testTopic.topic.name)
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
+                )
                 .assertExists()
+        }
+
+        test("circularProgressIndicator_whenScreenIsSyncing_exists") {
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = true,
+                        onboardingUiState = OnboardingUiState.NotShown,
+                        feedState = NewsFeedUiState.Success(emptyList()),
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
+            }
+
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
+                )
+                .assertExists()
+        }
+
+        test("topicSelector_whenNoTopicsSelected_showsTopicChipsAndDisabledDoneButton") {
+            val testData = followableTopicTestData.map { it.copy(isFollowed = false) }
+
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState = OnboardingUiState.Shown(
+                            topics = testData,
+                        ),
+                        feedState = NewsFeedUiState.Success(
+                            feed = emptyList(),
+                        ),
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
+            }
+
+            testData.forEach { testTopic ->
+                composeTestRule
+                    .onNodeWithText(testTopic.topic.name)
+                    .assertExists()
+                    .assertHasClickAction()
+            }
+
+            // Scroll until the Done button is visible
+            composeTestRule
+                .onAllNodes(hasScrollToNodeAction())
+                .onFirst()
+                .performScrollToNode(doneButtonMatcher)
+
+            composeTestRule
+                .onNode(doneButtonMatcher)
+                .assertExists()
+                .assertIsNotEnabled()
                 .assertHasClickAction()
         }
 
-        // Scroll until the Done button is visible
-        composeTestRule
-            .onAllNodes(hasScrollToNodeAction())
-            .onFirst()
-            .performScrollToNode(doneButtonMatcher)
-
-        composeTestRule
-            .onNode(doneButtonMatcher)
-            .assertExists()
-            .assertIsNotEnabled()
-            .assertHasClickAction()
-    }
-
-    @Test
-    fun topicSelector_whenSomeTopicsSelected_showsTopicChipsAndEnabledDoneButton() {
-        composeTestRule.setContent {
-            Box {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState =
-                    OnboardingUiState.Shown(
-                        // Follow one topic
-                        topics = followableTopicTestData.mapIndexed { index, testTopic ->
-                            testTopic.copy(isFollowed = index == 1)
-                        },
-                    ),
-                    feedState = NewsFeedUiState.Success(
-                        feed = emptyList(),
-                    ),
-                    deepLinkedUserNewsResource = null,
-                    onTopicCheckedChanged = { _, _ -> },
-                    onTopicClick = {},
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onDeepLinkOpened = {},
-                )
+        test("topicSelector_whenSomeTopicsSelected_showsTopicChipsAndEnabledDoneButton") {
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState =
+                        OnboardingUiState.Shown(
+                            // Follow one topic
+                            topics = followableTopicTestData.mapIndexed { index, testTopic ->
+                                testTopic.copy(isFollowed = index == 1)
+                            },
+                        ),
+                        feedState = NewsFeedUiState.Success(
+                            feed = emptyList(),
+                        ),
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
             }
-        }
 
-        followableTopicTestData.forEach { testTopic ->
+            followableTopicTestData.forEach { testTopic ->
+                composeTestRule
+                    .onNodeWithText(testTopic.topic.name)
+                    .assertExists()
+                    .assertHasClickAction()
+            }
+
+            // Scroll until the Done button is visible
             composeTestRule
-                .onNodeWithText(testTopic.topic.name)
+                .onAllNodes(hasScrollToNodeAction())
+                .onFirst()
+                .performScrollToNode(doneButtonMatcher)
+
+            composeTestRule
+                .onNode(doneButtonMatcher)
                 .assertExists()
+                .assertIsEnabled()
                 .assertHasClickAction()
         }
 
-        // Scroll until the Done button is visible
-        composeTestRule
-            .onAllNodes(hasScrollToNodeAction())
-            .onFirst()
-            .performScrollToNode(doneButtonMatcher)
-
-        composeTestRule
-            .onNode(doneButtonMatcher)
-            .assertExists()
-            .assertIsEnabled()
-            .assertHasClickAction()
-    }
-
-    @Test
-    fun feed_whenInterestsSelectedAndLoading_showsLoadingIndicator() {
-        composeTestRule.setContent {
-            Box {
-                ForYouScreen(
-                    isSyncing = false,
-                    onboardingUiState =
-                    OnboardingUiState.Shown(
-                        topics = followableTopicTestData,
-                    ),
-                    feedState = NewsFeedUiState.Loading,
-                    deepLinkedUserNewsResource = null,
-                    onTopicCheckedChanged = { _, _ -> },
-                    onTopicClick = {},
-                    saveFollowedTopics = {},
-                    onNewsResourcesCheckedChanged = { _, _ -> },
-                    onNewsResourceViewed = {},
-                    onDeepLinkOpened = {},
-                )
+        test("feed_whenInterestsSelectedAndLoading_showsLoadingIndicator") {
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState =
+                        OnboardingUiState.Shown(
+                            topics = followableTopicTestData,
+                        ),
+                        feedState = NewsFeedUiState.Loading,
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
             }
+
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
+                )
+                .assertExists()
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
-            )
-            .assertExists()
-    }
+        test("feed_whenNoInterestsSelectionAndLoading_showsLoadingIndicator") {
+            composeTestRule.setContent {
+                Box {
+                    ForYouScreen(
+                        isSyncing = false,
+                        onboardingUiState = OnboardingUiState.NotShown,
+                        feedState = NewsFeedUiState.Loading,
+                        deepLinkedUserNewsResource = null,
+                        onTopicCheckedChanged = { _, _ -> },
+                        onTopicClick = {},
+                        saveFollowedTopics = {},
+                        onNewsResourcesCheckedChanged = { _, _ -> },
+                        onNewsResourceViewed = {},
+                        onDeepLinkOpened = {},
+                    )
+                }
+            }
 
-    @Test
-    fun feed_whenNoInterestsSelectionAndLoading_showsLoadingIndicator() {
-        composeTestRule.setContent {
-            Box {
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
+                )
+                .assertExists()
+        }
+
+        test("feed_whenNoInterestsSelectionAndLoaded_showsFeed") {
+            composeTestRule.setContent {
                 ForYouScreen(
                     isSyncing = false,
                     onboardingUiState = OnboardingUiState.NotShown,
-                    feedState = NewsFeedUiState.Loading,
+                    feedState = NewsFeedUiState.Success(
+                        feed = userNewsResourcesTestData,
+                    ),
                     deepLinkedUserNewsResource = null,
                     onTopicCheckedChanged = { _, _ -> },
                     onTopicClick = {},
@@ -240,56 +260,30 @@ class ForYouScreenTest {
                     onDeepLinkOpened = {},
                 )
             }
-        }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_loading),
-            )
-            .assertExists()
-    }
+            composeTestRule
+                .onNodeWithText(
+                    userNewsResourcesTestData[0].title,
+                    substring = true,
+                )
+                .assertExists()
+                .assertHasClickAction()
 
-    @Test
-    fun feed_whenNoInterestsSelectionAndLoaded_showsFeed() {
-        composeTestRule.setContent {
-            ForYouScreen(
-                isSyncing = false,
-                onboardingUiState = OnboardingUiState.NotShown,
-                feedState = NewsFeedUiState.Success(
-                    feed = userNewsResourcesTestData,
-                ),
-                deepLinkedUserNewsResource = null,
-                onTopicCheckedChanged = { _, _ -> },
-                onTopicClick = {},
-                saveFollowedTopics = {},
-                onNewsResourcesCheckedChanged = { _, _ -> },
-                onNewsResourceViewed = {},
-                onDeepLinkOpened = {},
-            )
-        }
+            composeTestRule.onNode(hasScrollToNodeAction())
+                .performScrollToNode(
+                    hasText(
+                        userNewsResourcesTestData[1].title,
+                        substring = true,
+                    ),
+                )
 
-        composeTestRule
-            .onNodeWithText(
-                userNewsResourcesTestData[0].title,
-                substring = true,
-            )
-            .assertExists()
-            .assertHasClickAction()
-
-        composeTestRule.onNode(hasScrollToNodeAction())
-            .performScrollToNode(
-                hasText(
+            composeTestRule
+                .onNodeWithText(
                     userNewsResourcesTestData[1].title,
                     substring = true,
-                ),
-            )
-
-        composeTestRule
-            .onNodeWithText(
-                userNewsResourcesTestData[1].title,
-                substring = true,
-            )
-            .assertExists()
-            .assertHasClickAction()
+                )
+                .assertExists()
+                .assertHasClickAction()
+        }
     }
 }
