@@ -20,7 +20,7 @@ import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceEnti
 import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceTopicCrossRef
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Instant
 import kotlin.test.assertEquals

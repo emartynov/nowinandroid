@@ -27,7 +27,7 @@ import com.google.samples.apps.nowinandroid.core.testing.util.mainDispatcherTest
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsViewModel
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

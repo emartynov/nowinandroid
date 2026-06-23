@@ -17,7 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.common.result
 
 import app.cash.turbine.test
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.flow
 import kotlin.test.assertEquals
 

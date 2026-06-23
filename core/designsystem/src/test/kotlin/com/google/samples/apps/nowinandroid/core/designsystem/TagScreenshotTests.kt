@@ -30,16 +30,24 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(application = HiltTestApplication::class, qualifiers = "480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
 val TagScreenshotTests by testSuite {
+    robolectricTestSuite<TagScreenshotTestsContent>(
+        "Tag screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "480dpi"
+        },
+    )
+}
+
+class TagScreenshotTestsContent : RobolectricTestSuiteContent({
     testFixture {
         object : JUnit4RulesContext() {
             val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
@@ -77,4 +85,4 @@ val TagScreenshotTests by testSuite {
                 )
         }
     }
-}
+})

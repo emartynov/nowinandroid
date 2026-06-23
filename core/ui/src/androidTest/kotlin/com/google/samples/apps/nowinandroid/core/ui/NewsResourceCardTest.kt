@@ -24,8 +24,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTestData
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 
 val NewsResourceCardTest by testSuite {
     testFixture {

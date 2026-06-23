@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.datastore
 
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

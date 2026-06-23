@@ -45,8 +45,8 @@ import com.google.samples.apps.nowinandroid.uitesthiltmanifest.HiltComponentActi
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -72,21 +72,12 @@ val SnackbarScreenshotTests by testSuite {
             /**
              * Manages the components' state and is used to perform injection on your test
              */
-            val hiltRule = rule(HiltAndroidRule(this), order = 0)
+            val hiltRule = rule(HiltAndroidRule(this))
 
             /**
              * Use a test activity to set the content on.
              */
-            val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>(), order = 1)
-
-            @Inject
-            lateinit var networkMonitor: NetworkMonitor
-
-            @Inject
-            lateinit var timeZoneMonitor: TimeZoneMonitor
-
-            @Inject
-            lateinit var userDataRepository: FakeUserDataRepository
+            val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
 
             @Inject
             lateinit var topicsRepository: TopicsRepository

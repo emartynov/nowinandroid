@@ -17,7 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.datastore
 
 import androidx.datastore.core.CorruptionException
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals

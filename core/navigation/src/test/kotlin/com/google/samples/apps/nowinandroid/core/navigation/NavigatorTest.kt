@@ -19,7 +19,7 @@ package com.google.samples.apps.nowinandroid.core.navigation
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.google.common.truth.Truth.assertThat
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlin.test.assertFailsWith
 
 private object TestFirstTopLevelKey : NavKey

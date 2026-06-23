@@ -31,7 +31,7 @@ import com.google.samples.apps.nowinandroid.feature.search.impl.RecentSearchQuer
 import com.google.samples.apps.nowinandroid.feature.search.impl.SearchResultUiState.EmptyQuery
 import com.google.samples.apps.nowinandroid.feature.search.impl.SearchResultUiState.Loading
 import com.google.samples.apps.nowinandroid.feature.search.impl.SearchResultUiState.SearchNotReady
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

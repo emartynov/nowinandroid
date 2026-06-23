@@ -34,8 +34,8 @@ import com.google.samples.apps.nowinandroid.core.ui.UserNewsResourcePreviewParam
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.NotShown
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.Shown
 import dagger.hilt.android.testing.HiltTestApplication
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 import org.hamcrest.Matchers
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode

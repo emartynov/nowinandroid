@@ -25,8 +25,8 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTestData
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 import com.google.samples.apps.nowinandroid.core.ui.R as CoreUiR
 import com.google.samples.apps.nowinandroid.feature.interests.api.R as InterestsR
 

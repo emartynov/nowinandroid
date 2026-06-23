@@ -42,8 +42,12 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.LocalGradien
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.LocalTintTheme
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.TintTheme
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import kotlin.test.assertEquals
 
 /**
@@ -55,6 +59,13 @@ import kotlin.test.assertEquals
  * design system.
  */
 val ThemeTest by testSuite {
+    robolectricTestSuite<ThemeTestContent>(
+        "Theme test",
+        testConfig = TestConfig.robolectric { },
+    )
+}
+
+class ThemeTestContent : RobolectricTestSuiteContent({
     testFixture {
         object : JUnit4RulesContext() {
             val composeTestRule = rule(createComposeRule())
@@ -213,7 +224,7 @@ val ThemeTest by testSuite {
             }
         }
     }
-}
+})
 
 @Composable
 private fun dynamicLightColorSchemeWithFallback(): ColorScheme = when {

@@ -37,8 +37,8 @@ import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTes
 import com.google.samples.apps.nowinandroid.core.testing.data.newsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.ui.R.string
 import com.google.samples.apps.nowinandroid.feature.search.api.R
-import de.infix.testBalloon.framework.JUnit4RulesContext
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 
 /**
  * UI test for checking the correct behaviour of the Search screen.

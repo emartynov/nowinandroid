@@ -35,7 +35,7 @@ import com.google.samples.apps.nowinandroid.core.testing.util.TestAnalyticsHelpe
 import com.google.samples.apps.nowinandroid.core.testing.util.TestSyncManager
 import com.google.samples.apps.nowinandroid.core.testing.util.mainDispatcherTestConfig
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

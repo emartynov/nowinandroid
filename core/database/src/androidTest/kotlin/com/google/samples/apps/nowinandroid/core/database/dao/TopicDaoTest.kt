@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.database.dao
 
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.first
 import kotlin.test.assertEquals
 

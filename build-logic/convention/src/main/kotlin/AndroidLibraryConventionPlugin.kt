@@ -57,7 +57,6 @@ abstract class AndroidLibraryConventionPlugin : Plugin<Project> {
             dependencies {
                 "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
                 "testImplementation"(libs.findLibrary("kotlin.test").get())
-                "testImplementation"(libs.findLibrary("junit").get())
 
                 "implementation"(libs.findLibrary("androidx.tracing.ktx").get())
             }

@@ -21,7 +21,7 @@ import com.android.tools.lint.checks.infrastructure.TestFiles.kotlin
 import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
 import com.google.samples.apps.nowinandroid.lint.TestMethodNameDetector.Companion.FORMAT
 import com.google.samples.apps.nowinandroid.lint.TestMethodNameDetector.Companion.PREFIX
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 
 val TestMethodNameDetectorTest by testSuite {
 

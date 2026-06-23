@@ -15,6 +15,7 @@
  */
 plugins {
     alias(libs.plugins.nowinandroid.android.library)
+    alias(libs.plugins.nowinandroid.android.testballoon)
     alias(libs.plugins.nowinandroid.hilt)
 }
 
@@ -23,6 +24,7 @@ android {
 }
 
 dependencies {
+    api(libs.testBalloon.framework.core)
     api(libs.kotlinx.coroutines.test)
     api(projects.core.analytics)
     api(projects.core.common)

@@ -19,7 +19,7 @@ package com.google.samples.apps.nowinandroid.core.network.demo
 import JvmUnitTestDemoAssetManager
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -34,9 +34,9 @@ val DemoNiaNetworkDataSourceTest by testSuite {
             networkJson = Json { ignoreUnknownKeys = true },
             assets = JvmUnitTestDemoAssetManager,
         )
-    } asParameterForEach { subject ->
+    } asParameterForEach {
         @Suppress("ktlint:standard:max-line-length")
-        test("deserialization of topics") {
+        test("deserialization of topics") { subject ->
             assertEquals(
                 NetworkTopic(
                     id = "1",
@@ -51,7 +51,7 @@ val DemoNiaNetworkDataSourceTest by testSuite {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        test("deserialization of news resources") {
+        test("deserialization of news resources") { subject ->
             assertEquals(
                 NetworkNewsResource(
                     id = "125",

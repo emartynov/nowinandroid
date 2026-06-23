@@ -17,7 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.datastore
 
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
-import de.infix.testBalloon.framework.testSuite
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.first
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -25,48 +25,48 @@ import kotlin.test.assertTrue
 val NiaPreferencesDataSourceTest by testSuite {
     testFixture {
         NiaPreferencesDataSource(InMemoryDataStore(UserPreferences.getDefaultInstance()))
-    } asContextForEach { subject ->
+    } asContextForEach { 
 
         test("shouldHideOnboardingIsFalseByDefault") {
-            assertFalse(subject.userData.first().shouldHideOnboarding)
+            assertFalse(userData.first().shouldHideOnboarding)
         }
 
         test("userShouldHideOnboardingIsTrueWhenSet") {
-            subject.setShouldHideOnboarding(true)
-            assertTrue(subject.userData.first().shouldHideOnboarding)
+            setShouldHideOnboarding(true)
+            assertTrue(userData.first().shouldHideOnboarding)
         }
 
         test("userShouldHideOnboarding_unfollowsLastTopic_shouldHideOnboardingIsFalse") {
             // Given: user completes onboarding by selecting a single topic.
-            subject.setTopicIdFollowed("1", true)
-            subject.setShouldHideOnboarding(true)
+            setTopicIdFollowed("1", true)
+            setShouldHideOnboarding(true)
 
             // When: they unfollow that topic.
-            subject.setTopicIdFollowed("1", false)
+            setTopicIdFollowed("1", false)
 
             // Then: onboarding should be shown again
-            assertFalse(subject.userData.first().shouldHideOnboarding)
+            assertFalse(userData.first().shouldHideOnboarding)
         }
 
         test("userShouldHideOnboarding_unfollowsAllTopics_shouldHideOnboardingIsFalse") {
             // Given: user completes onboarding by selecting several topics.
-            subject.setFollowedTopicIds(setOf("1", "2"))
-            subject.setShouldHideOnboarding(true)
+            setFollowedTopicIds(setOf("1", "2"))
+            setShouldHideOnboarding(true)
 
             // When: they unfollow those topics.
-            subject.setFollowedTopicIds(emptySet())
+            setFollowedTopicIds(emptySet())
 
             // Then: onboarding should be shown again
-            assertFalse(subject.userData.first().shouldHideOnboarding)
+            assertFalse(userData.first().shouldHideOnboarding)
         }
 
         test("shouldUseDynamicColorFalseByDefault") {
-            assertFalse(subject.userData.first().useDynamicColor)
+            assertFalse(userData.first().useDynamicColor)
         }
 
         test("userShouldUseDynamicColorIsTrueWhenSet") {
-            subject.setDynamicColorPreference(true)
-            assertTrue(subject.userData.first().useDynamicColor)
+            setDynamicColorPreference(true)
+            assertTrue(userData.first().useDynamicColor)
         }
     }
 }

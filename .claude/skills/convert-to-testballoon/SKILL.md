@@ -45,12 +45,23 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 
-// ADD
-import de.infix.testBalloon.framework.testSuite
+// ADD — all from de.infix.testBalloon.framework.core (NOT .framework directly)
+import de.infix.testBalloon.framework.core.testSuite
 // Add only what the converted code actually uses:
-// import de.infix.testBalloon.framework.testFixture   (if fixtures used)
-// import de.infix.testBalloon.framework.TestConfig     (if config used)
+import de.infix.testBalloon.framework.core.TestConfig    // if TestConfig used
+import de.infix.testBalloon.framework.core.JUnit4RulesContext  // if JUnit rules used
 ```
+
+For Robolectric tests, also add:
+```
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric   // REQUIRED for TestConfig.robolectric { }
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
+```
+
+**Package warning**: The correct package is `de.infix.testBalloon.framework.core` (not `.framework` alone).
+`de.infix.testBalloon.framework.testFixture` is a stale pre-v1.0.1 import — never use it.
+`JUnit4RulesContext` lives in `.framework.core`, NOT in `.integration.robolectric`.
 
 Keep all assertion imports unchanged (`kotlin.test.*`, `org.junit.Assert.*`, Kotest, Truth, etc.).
 
@@ -114,16 +125,34 @@ val FooTest by testSuite {
         Foo()
     } closeWith {
         close()
-    } asParameterForEach { subject ->
-        test("it works") { subject.doSomething() }
+    } asParameterForEach {
+        test("it works") { subject ->
+            subject.doSomething()
+        }
     }
 }
 ```
 
 - `@Before` body → `testFixture { ... }` initialization block
 - `@After` body → `closeWith { ... }` (use `this` = the fixture value)
-- Tests that used the field now receive it as a lambda parameter
+- Each `test("...") { subject -> }` receives the fixture as a parameter — NOT the outer `asParameterForEach` lambda
 - If there is no teardown, omit `closeWith`
+
+**Critical**: The fixture parameter goes inside EACH test body, not the outer `asParameterForEach` lambda.
+```kotlin
+// WRONG — subject not available at registration time
+testFixture { Foo() } asParameterForEach { subject ->
+    test("it works") { subject.doSomething() }
+}
+
+// RIGHT — subject received as a test-time parameter
+testFixture { Foo() } asParameterForEach {
+    test("it works") { subject ->
+        subject.doSomething()
+    }
+}
+```
+The outer `asParameterForEach { }` lambda runs at test *registration* time; the fixture is only created at test *execution* time, so it's only available inside each `test { subject -> }` body.
 
 ### 3. Shared setup/teardown (`@BeforeClass` / `@AfterClass`)
 
@@ -278,7 +307,7 @@ val mainDispatcherTestConfig = TestConfig.aroundEachTest { action ->
 val FooTest by testSuite(testConfig = mainDispatcherTestConfig) { ... }
 ```
 
-Add imports: `de.infix.testBalloon.framework.TestConfig`,
+Add imports: `de.infix.testBalloon.framework.core.TestConfig`,
 `kotlinx.coroutines.test.UnconfinedTestDispatcher`, `kotlinx.coroutines.test.setMain`,
 `kotlinx.coroutines.test.resetMain`.
 
@@ -302,7 +331,7 @@ testFixture {
 }
 ```
 
-Add import: `import de.infix.testBalloon.framework.JUnit4RulesContext`
+Add import: `import de.infix.testBalloon.framework.core.JUnit4RulesContext` (from `.framework.core`, NOT `.integration.robolectric`)
 
 Note: Only use this for rules you can't change. Avoid creating new JUnit rules; use fixtures instead.
 
@@ -391,8 +420,65 @@ Use them to generate `test(...)` calls in a loop.
 
 ### 8. Robolectric (`@RunWith(RobolectricTestRunner::class)`)
 
-Remove the annotation — testBalloon's Robolectric integration handles this via its Gradle plugin.
-Ensure the module has `de.infix.testBalloon:testBalloon-integration-robolectric` on the classpath.
+Robolectric tests require a two-class pattern: a top-level `testSuite` that registers a
+`robolectricTestSuite<Content>`, and a separate `RobolectricTestSuiteContent` class containing
+the actual test definitions.
+
+**Build setup** — add to `build.gradle.kts`:
+```kotlin
+plugins {
+    alias(libs.plugins.nowinandroid.android.testballoon)
+}
+dependencies {
+    testImplementation(libs.testBalloon.integration.robolectric)
+}
+```
+
+**`robolectric.properties`** — for graphics/looper mode (these are NOT in `TestConfig.robolectric { }`):
+```properties
+# core/yourmodule/src/test/resources/robolectric.properties
+sdk = 35
+nativeGraphicsMode = NATIVE
+looperMode = PAUSED
+```
+
+**Full pattern:**
+```kotlin
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric   // MUST import explicitly
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
+
+val FooScreenshotTests by testSuite {
+    robolectricTestSuite<FooScreenshotTestsContent>(
+        "Foo screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class   // omit if no Hilt
+            qualifiers = "480dpi"                      // omit if not needed
+        },
+    )
+}
+
+class FooScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+        }
+    } asContextForEach {
+        test("foo multiple themes") {
+            composeTestRule.captureMultiTheme("Foo") { FooComposable() }
+        }
+    }
+})
+```
+
+**Key details:**
+- `RobolectricSettings` builder only has `sdk`, `fontScale`, `application`, `qualifiers` — no `graphicsMode`/`looperMode`
+- `@Config`, `@GraphicsMode`, `@LooperMode` annotations do NOT work on testBalloon top-level properties or content classes — use `robolectric.properties` instead
+- The `robolectric` import (`import ...integration.robolectric.robolectric`) is required for `TestConfig.robolectric { }` to resolve
+- `JUnit4RulesContext` is from `de.infix.testBalloon.framework.core`, NOT from the robolectric integration package
 
 ### 9. Nested test organization
 
