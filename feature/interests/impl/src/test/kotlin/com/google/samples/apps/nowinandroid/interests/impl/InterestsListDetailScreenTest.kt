@@ -46,8 +46,11 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -65,21 +68,28 @@ internal class InterestsListDetailFixture : JUnit4RulesContext() {
     lateinit var topicsRepository: TopicsRepository
 }
 
-val InterestsListDetailScreenTest by testSuite(
-    testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric {
-        sdk = 35
-        application = HiltTestApplication::class
-    },
-) {
+val InterestsListDetailScreenTest by testSuite {
+    robolectricTestSuite<InterestsListDetailScreenTestContent>(
+        "InterestsListDetailScreen tests",
+        testConfig = TestConfig.robolectric {
+            sdk = 35
+            application = HiltTestApplication::class
+        },
+    )
+}
+
+class InterestsListDetailScreenTestContent : RobolectricTestSuiteContent({
     testFixture {
         InterestsListDetailFixture()
     } asContextForEach {
+
         test(
             "expandedWidth initialState showsTwoPanesWithPlaceholder",
-            testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric { qualifiers = EXPANDED_WIDTH },
+            testConfig = TestConfig.robolectric { qualifiers = EXPANDED_WIDTH },
         ) {
             hiltRule.inject()
-            val placeholderText = composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
+            val placeholderText =
+                composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
             composeTestRule.apply {
                 setContent { NiaTheme { TestNavDisplay() } }
                 onNodeWithTag(LIST_PANE_TEST_TAG).assertIsDisplayed()
@@ -89,10 +99,11 @@ val InterestsListDetailScreenTest by testSuite(
 
         test(
             "compactWidth initialState showsListPane",
-            testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
+            testConfig = TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
         ) {
             hiltRule.inject()
-            val placeholderText = composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
+            val placeholderText =
+                composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
             composeTestRule.apply {
                 setContent { NiaTheme { TestNavDisplay() } }
                 onNodeWithTag(LIST_PANE_TEST_TAG).assertIsDisplayed()
@@ -102,11 +113,13 @@ val InterestsListDetailScreenTest by testSuite(
 
         test(
             "expandedWidth topicSelected updatesDetailPane",
-            testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric { qualifiers = EXPANDED_WIDTH },
+            testConfig = TestConfig.robolectric { qualifiers = EXPANDED_WIDTH },
         ) {
             hiltRule.inject()
-            val placeholderText = composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
-            val getTopics: () -> List<Topic> = { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
+            val placeholderText =
+                composeTestRule.activity.getString(R.string.feature_interests_api_select_an_interest)
+            val getTopics: () -> List<Topic> =
+                { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
             composeTestRule.apply {
                 setContent { NiaTheme { TestNavDisplay() } }
                 val firstTopic = getTopics().first()
@@ -120,10 +133,11 @@ val InterestsListDetailScreenTest by testSuite(
 
         test(
             "compactWidth topicSelected showsTopicDetailPane",
-            testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
+            testConfig = TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
         ) {
             hiltRule.inject()
-            val getTopics: () -> List<Topic> = { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
+            val getTopics: () -> List<Topic> =
+                { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
             composeTestRule.apply {
                 setContent { NiaTheme { TestNavDisplay() } }
                 val firstTopic = getTopics().first()
@@ -135,10 +149,11 @@ val InterestsListDetailScreenTest by testSuite(
 
         test(
             "compactWidth backPressFromTopicDetail showsListPane",
-            testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
+            testConfig = TestConfig.robolectric { qualifiers = COMPACT_WIDTH },
         ) {
             hiltRule.inject()
-            val getTopics: () -> List<Topic> = { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
+            val getTopics: () -> List<Topic> =
+                { runBlocking { topicsRepository.getTopics().first().sortedBy { it.name } } }
             composeTestRule.apply {
                 setContent { NiaTheme { TestNavDisplay() } }
                 val firstTopic = getTopics().first()
@@ -150,7 +165,7 @@ val InterestsListDetailScreenTest by testSuite(
             }
         }
     }
-}
+})
 
 private val Topic.testTag
     get() = "topic:${this.id}"

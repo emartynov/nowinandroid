@@ -61,12 +61,12 @@ val DemoNiaNetworkDataSourceTest by testSuite {
                     headerImageUrl = "https://developer.android.com/images/hero-assets/android-basics-compose.svg",
                     publishDate = LocalDateTime(
                         year = 2022,
-                        monthNumber = 5,
-                        dayOfMonth = 4,
+                        month = 5,
+                        day = 4,
                         hour = 23,
                         minute = 0,
                         second = 0,
-                        nanosecond = 0,
+                        nanosecond = 0
                     ).toInstant(TimeZone.UTC),
                     type = "Codelab",
                     topics = listOf("2", "3", "10"),

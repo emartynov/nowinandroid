@@ -26,8 +26,8 @@ import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserData
 import com.google.samples.apps.nowinandroid.core.testing.repository.emptyUserData
 import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 val CompositeUserNewsResourceRepositoryTest by testSuite {
     testFixture {

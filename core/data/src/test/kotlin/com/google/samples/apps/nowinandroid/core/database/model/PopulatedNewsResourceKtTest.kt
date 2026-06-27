@@ -19,8 +19,8 @@ package com.google.samples.apps.nowinandroid.core.database.model
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import de.infix.testBalloon.framework.core.testSuite
-import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 val PopulatedNewsResourceKtTest by testSuite {
     test("populated news resource can be mapped to news resource") {

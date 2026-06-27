@@ -449,7 +449,7 @@ by `TestConfig.robolectric { }` or by annotations on testBalloon types):
 ```properties
 # yourmodule/src/test/resources/robolectric.properties
 sdk = 35
-nativeGraphicsMode = NATIVE
+graphicsMode = NATIVE
 looperMode = PAUSED
 # Set `application` here too if testBalloon-integration-robolectric is NOT on the classpath:
 application = dagger.hilt.android.testing.HiltTestApplication

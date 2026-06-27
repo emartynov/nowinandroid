@@ -22,8 +22,8 @@ import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 internal val NewsResourceDaoTest by testSuite {
     niaDbFixture() asContextForEach {

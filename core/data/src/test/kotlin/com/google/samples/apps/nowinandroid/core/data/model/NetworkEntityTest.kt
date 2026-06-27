@@ -22,8 +22,8 @@ import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResour
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
 import de.infix.testBalloon.framework.core.testSuite
-import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 val NetworkEntityTest by testSuite {
     test("network topic maps to database model") {

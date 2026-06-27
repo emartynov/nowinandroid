@@ -23,10 +23,10 @@ import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlin.time.Instant
 
 val userNewsResourcesTestData: List<UserNewsResource> = UserData(
     bookmarkedNewsResources = setOf("1", "4"),
@@ -47,12 +47,12 @@ val userNewsResourcesTestData: List<UserNewsResource> = UserData(
                 headerImageUrl = "https://developer.android.com/images/hero-assets/android-basics-compose.svg",
                 publishDate = LocalDateTime(
                     year = 2022,
-                    monthNumber = 5,
-                    dayOfMonth = 4,
+                    month = 5,
+                    day = 4,
                     hour = 23,
                     minute = 0,
                     second = 0,
-                    nanosecond = 0,
+                    nanosecond = 0
                 ).toInstant(TimeZone.UTC),
                 type = "Codelab",
                 topics = listOf(topicsTestData[2]),
@@ -95,8 +95,7 @@ val userNewsResourcesTestData: List<UserNewsResource> = UserData(
             newsResource = NewsResource(
                 id = "4",
                 title = "New Jetpack Release",
-                content = "New Jetpack release includes updates to libraries such as CameraX, Benchmark, and" +
-                    "more!",
+                content = "New Jetpack release includes updates to libraries such as CameraX, Benchmark, and more!",
                 url = "https://developer.android.com/jetpack/androidx/versions/all-channel",
                 headerImageUrl = "",
                 publishDate = Instant.parse("2022-10-01T00:00:00.000Z"),

@@ -39,16 +39,10 @@ import de.infix.testBalloon.framework.core.testSuite
 val ForYouScreenTest by testSuite {
     testFixture {
         object : JUnit4RulesContext() {
-            val postNotificationsPermission = rule(GrantPostNotificationsPermissionRule(), order = 0)
-            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>(), order = 1)
+            val postNotificationsPermission = rule(GrantPostNotificationsPermissionRule())
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
     } asContextForEach {
-
-        val doneButtonMatcher by lazy {
-            hasText(
-                composeTestRule.activity.resources.getString(R.string.feature_foryou_api_done),
-            )
-        }
 
         test("circularProgressIndicator_whenScreenIsLoading_exists") {
             composeTestRule.setContent {
@@ -101,6 +95,12 @@ val ForYouScreenTest by testSuite {
         }
 
         test("topicSelector_whenNoTopicsSelected_showsTopicChipsAndDisabledDoneButton") {
+            val doneButtonMatcher by lazy {
+                hasText(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_done),
+                )
+            }
+
             val testData = followableTopicTestData.map { it.copy(isFollowed = false) }
 
             composeTestRule.setContent {
@@ -145,6 +145,12 @@ val ForYouScreenTest by testSuite {
         }
 
         test("topicSelector_whenSomeTopicsSelected_showsTopicChipsAndEnabledDoneButton") {
+            val doneButtonMatcher by lazy {
+                hasText(
+                    composeTestRule.activity.resources.getString(R.string.feature_foryou_api_done),
+                )
+            }
+
             composeTestRule.setContent {
                 Box {
                     ForYouScreen(

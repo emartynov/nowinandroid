@@ -34,8 +34,13 @@ import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState.Success
 import com.google.samples.apps.nowinandroid.core.ui.UserNewsResourcePreviewParameterProvider
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.NotShown
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.Shown
+import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import org.hamcrest.Matchers
 import java.util.TimeZone
 
@@ -43,6 +48,15 @@ import java.util.TimeZone
  * Screenshot tests for the [ForYouScreen].
  */
 val ForYouScreenScreenshotTests by testSuite {
+    robolectricTestSuite<ForYouScreenScreenshotTestsContent>(
+        "ForYouScreen screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+        },
+    )
+}
+
+class ForYouScreenScreenshotTestsContent : RobolectricTestSuiteContent({
     testFixture {
         object : JUnit4RulesContext() {
             val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
@@ -54,55 +68,6 @@ val ForYouScreenScreenshotTests by testSuite {
             }
         }
     } asContextForEach {
-
-        @Composable
-        fun ForYouScreenTopicSelection(news: List<UserNewsResource>) {
-            NiaTheme {
-                NiaBackground {
-                    ForYouScreen(
-                        isSyncing = false,
-                        onboardingUiState = Shown(
-                            topics = news.flatMap { it.followableTopics }
-                                .distinctBy { it.topic.id },
-                        ),
-                        feedState = Success(
-                            feed = news,
-                        ),
-                        onTopicCheckedChanged = { _, _ -> },
-                        saveFollowedTopics = {},
-                        onNewsResourcesCheckedChanged = { _, _ -> },
-                        onNewsResourceViewed = {},
-                        onTopicClick = {},
-                        deepLinkedUserNewsResource = null,
-                        onDeepLinkOpened = {},
-                    )
-                }
-            }
-        }
-
-        @Composable
-        fun ForYouScreenPopulatedAndLoading(news: List<UserNewsResource>) {
-            NiaTheme {
-                NiaBackground {
-                    NiaTheme {
-                        ForYouScreen(
-                            isSyncing = true,
-                            onboardingUiState = OnboardingUiState.Loading,
-                            feedState = Success(
-                                feed = news,
-                            ),
-                            onTopicCheckedChanged = { _, _ -> },
-                            saveFollowedTopics = {},
-                            onNewsResourcesCheckedChanged = { _, _ -> },
-                            onNewsResourceViewed = {},
-                            onTopicClick = {},
-                            deepLinkedUserNewsResource = null,
-                            onDeepLinkOpened = {},
-                        )
-                    }
-                }
-            }
-        }
 
         test("forYouScreenPopulatedFeed") {
             composeTestRule.captureMultiDevice("ForYouScreenPopulatedFeed") {
@@ -188,6 +153,55 @@ val ForYouScreenScreenshotTests by testSuite {
                 darkMode = true,
             ) {
                 ForYouScreenPopulatedAndLoading(userNewsResources)
+            }
+        }
+    }
+})
+
+@Composable
+private fun ForYouScreenTopicSelection(news: List<UserNewsResource>) {
+    NiaTheme {
+        NiaBackground {
+            ForYouScreen(
+                isSyncing = false,
+                onboardingUiState = Shown(
+                    topics = news.flatMap { it.followableTopics }
+                        .distinctBy { it.topic.id },
+                ),
+                feedState = Success(
+                    feed = news,
+                ),
+                onTopicCheckedChanged = { _, _ -> },
+                saveFollowedTopics = {},
+                onNewsResourcesCheckedChanged = { _, _ -> },
+                onNewsResourceViewed = {},
+                onTopicClick = {},
+                deepLinkedUserNewsResource = null,
+                onDeepLinkOpened = {},
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForYouScreenPopulatedAndLoading(news: List<UserNewsResource>) {
+    NiaTheme {
+        NiaBackground {
+            NiaTheme {
+                ForYouScreen(
+                    isSyncing = true,
+                    onboardingUiState = OnboardingUiState.Loading,
+                    feedState = Success(
+                        feed = news,
+                    ),
+                    onTopicCheckedChanged = { _, _ -> },
+                    saveFollowedTopics = {},
+                    onNewsResourcesCheckedChanged = { _, _ -> },
+                    onNewsResourceViewed = {},
+                    onTopicClick = {},
+                    deepLinkedUserNewsResource = null,
+                    onDeepLinkOpened = {},
+                )
             }
         }
     }

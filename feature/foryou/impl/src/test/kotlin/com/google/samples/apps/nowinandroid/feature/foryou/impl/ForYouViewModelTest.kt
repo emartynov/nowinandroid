@@ -36,21 +36,22 @@ import com.google.samples.apps.nowinandroid.core.testing.util.TestSyncManager
 import com.google.samples.apps.nowinandroid.core.testing.util.mainDispatcherTestConfig
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.robolectric
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.datetime.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * To learn more about how this test handles Flows created with stateIn, see
  * https://developer.android.com/kotlin/flow/test#statein
  */
-val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
+val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig.robolectric { }) {
     testFixture {
         object {
             val syncManager = TestSyncManager()
