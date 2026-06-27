@@ -139,8 +139,7 @@ val OfflineFirstNewsRepositoryTest by testSuite {
             assertEquals(
                 expected = net.getNewsResources().map(NetworkNewsResource::topicEntityShells).flatten()
                     .distinctBy(TopicEntity::id).sortedBy(TopicEntity::toString),
-                actual = newsDao.getNewsResources().first().map { it.topics }.flatten()
-                    .map { TopicEntity(it.id, it.name, it.shortDescription, it.longDescription, it.url, it.imageUrl) }
+                actual = topicDao.getTopicEntities().first()
                     .distinctBy(TopicEntity::id).sortedBy(TopicEntity::toString),
             )
         }
