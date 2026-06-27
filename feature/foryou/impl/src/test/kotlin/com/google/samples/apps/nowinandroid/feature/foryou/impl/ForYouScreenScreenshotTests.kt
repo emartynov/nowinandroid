@@ -25,6 +25,7 @@ import com.google.android.apps.common.testing.accessibility.framework.checks.Tex
 import com.google.android.apps.common.testing.accessibility.framework.matcher.ElementMatchers.withText
 import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaBackground
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
+import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultTestDevices
 import com.google.samples.apps.nowinandroid.core.testing.util.captureForDevice
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiDevice
@@ -33,21 +34,14 @@ import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState.Success
 import com.google.samples.apps.nowinandroid.core.ui.UserNewsResourcePreviewParameterProvider
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.NotShown
 import com.google.samples.apps.nowinandroid.feature.foryou.impl.OnboardingUiState.Shown
-import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
 import de.infix.testBalloon.framework.core.testSuite
 import org.hamcrest.Matchers
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
 import java.util.TimeZone
 
 /**
  * Screenshot tests for the [ForYouScreen].
  */
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(application = HiltTestApplication::class)
-@LooperMode(LooperMode.Mode.PAUSED)
 val ForYouScreenScreenshotTests by testSuite {
     testFixture {
         object : JUnit4RulesContext() {
@@ -62,17 +56,17 @@ val ForYouScreenScreenshotTests by testSuite {
     } asContextForEach {
 
         @Composable
-        fun ForYouScreenTopicSelection() {
+        fun ForYouScreenTopicSelection(news: List<UserNewsResource>) {
             NiaTheme {
                 NiaBackground {
                     ForYouScreen(
                         isSyncing = false,
                         onboardingUiState = Shown(
-                            topics = userNewsResources.flatMap { news -> news.followableTopics }
+                            topics = news.flatMap { it.followableTopics }
                                 .distinctBy { it.topic.id },
                         ),
                         feedState = Success(
-                            feed = userNewsResources,
+                            feed = news,
                         ),
                         onTopicCheckedChanged = { _, _ -> },
                         saveFollowedTopics = {},
@@ -87,7 +81,7 @@ val ForYouScreenScreenshotTests by testSuite {
         }
 
         @Composable
-        fun ForYouScreenPopulatedAndLoading() {
+        fun ForYouScreenPopulatedAndLoading(news: List<UserNewsResource>) {
             NiaTheme {
                 NiaBackground {
                     NiaTheme {
@@ -95,7 +89,7 @@ val ForYouScreenScreenshotTests by testSuite {
                             isSyncing = true,
                             onboardingUiState = OnboardingUiState.Loading,
                             feedState = Success(
-                                feed = userNewsResources,
+                                feed = news,
                             ),
                             onTopicCheckedChanged = { _, _ -> },
                             saveFollowedTopics = {},
@@ -165,7 +159,7 @@ val ForYouScreenScreenshotTests by testSuite {
                     ),
                 ),
             ) {
-                ForYouScreenTopicSelection()
+                ForYouScreenTopicSelection(userNewsResources)
             }
         }
 
@@ -176,13 +170,13 @@ val ForYouScreenScreenshotTests by testSuite {
                 screenshotName = "ForYouScreenTopicSelection",
                 darkMode = true,
             ) {
-                ForYouScreenTopicSelection()
+                ForYouScreenTopicSelection(userNewsResources)
             }
         }
 
         test("forYouScreenPopulatedAndLoading") {
             composeTestRule.captureMultiDevice("ForYouScreenPopulatedAndLoading") {
-                ForYouScreenPopulatedAndLoading()
+                ForYouScreenPopulatedAndLoading(userNewsResources)
             }
         }
 
@@ -193,7 +187,7 @@ val ForYouScreenScreenshotTests by testSuite {
                 screenshotName = "ForYouScreenPopulatedAndLoading",
                 darkMode = true,
             ) {
-                ForYouScreenPopulatedAndLoading()
+                ForYouScreenPopulatedAndLoading(userNewsResources)
             }
         }
     }

@@ -28,10 +28,10 @@ import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.Int
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsViewModel
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.robolectric
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 
 /**
@@ -44,8 +44,7 @@ import kotlin.test.assertEquals
  * TODO: Remove Robolectric if/when AndroidX Navigation API is updated to remove Android dependency.
  *  See https://issuetracker.google.com/340966212.
  */
-@Config(sdk = [35])
-val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
+val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig.robolectric { sdk = 35 }) {
     testFixture {
         object {
             val userDataRepository = TestUserDataRepository()
@@ -70,14 +69,14 @@ val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiState whenFollowedTopicsAreLoading thenShowLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
             userDataRepository.setFollowedTopicIds(emptySet())
             assertEquals(InterestsUiState.Loading, viewModel.uiState.value)
         }
 
         test("uiState whenFollowingNewTopic thenShowUpdatedTopics") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
             val toggleTopicId = testOutputTopics[1].topic.id
             topicsRepository.sendTopics(testInputTopics.map { it.topic })
@@ -104,7 +103,7 @@ val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiState whenUnfollowingTopics thenShowUpdatedTopics") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
             val toggleTopicId = testOutputTopics[1].topic.id
 

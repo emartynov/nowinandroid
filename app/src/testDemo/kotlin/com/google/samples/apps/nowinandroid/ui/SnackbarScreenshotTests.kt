@@ -46,166 +46,137 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
 import java.util.TimeZone
 import javax.inject.Inject
 
 /**
  * Tests that the Snackbar is correctly displayed on different screen sizes.
  */
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-// Configure Robolectric to use a very large screen size that can fit all of the test sizes.
-// This allows enough room to render the content under test without clipping or scaling.
-@Config(application = HiltTestApplication::class, qualifiers = "w1000dp-h1000dp-480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
-@HiltAndroidTest
 val SnackbarScreenshotTests by testSuite {
-    testFixture {
-        object : JUnit4RulesContext() {
-            /**
-             * Manages the components' state and is used to perform injection on your test
-             */
-            val hiltRule = rule(HiltAndroidRule(this))
+    robolectricTestSuite<SnackbarScreenshotTestsContent>(
+        "Snackbar screenshot tests",
+        // Configure Robolectric to use a very large screen size that can fit all of the test sizes.
+        // This allows enough room to render the content under test without clipping or scaling.
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "w1000dp-h1000dp-480dpi"
+        },
+    )
+}
 
-            /**
-             * Use a test activity to set the content on.
-             */
-            val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
-
-            @Inject
-            lateinit var topicsRepository: TopicsRepository
-
-            @Inject
-            lateinit var userNewsResourceRepository: UserNewsResourceRepository
+class SnackbarScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture { SnackbarScreenshotFixture() } asContextForEach {
+        test("phone no snackbar") {
+            captureSnackbarScreenshot(400.dp, 500.dp, "snackbar_compact_medium_noSnackbar") { }
         }
-    } asContextForEach {
-        hiltRule.inject()
+        test("snackbar shown phone") {
+            captureSnackbarScreenshot(400.dp, 500.dp, "snackbar_compact_medium") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+        test("snackbar shown foldable") {
+            captureSnackbarScreenshot(600.dp, 600.dp, "snackbar_medium_medium") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+        test("snackbar shown tablet") {
+            captureSnackbarScreenshot(900.dp, 900.dp, "snackbar_expanded_expanded") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+    }
+})
 
-        // Configure user data
+@HiltAndroidTest
+class SnackbarScreenshotFixture : JUnit4RulesContext() {
+    val hiltRule = rule(HiltAndroidRule(this))
+    val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
+
+    @Inject lateinit var networkMonitor: NetworkMonitor
+    @Inject lateinit var timeZoneMonitor: TimeZoneMonitor
+    @Inject lateinit var userDataRepository: FakeUserDataRepository
+    @Inject lateinit var topicsRepository: TopicsRepository
+    @Inject lateinit var userNewsResourceRepository: UserNewsResourceRepository
+
+    fun captureSnackbarScreenshot(
+        width: Dp,
+        height: Dp,
+        screenshotName: String,
+        action: suspend (snackbarHostState: SnackbarHostState) -> Unit,
+    ) {
+        hiltRule.inject()
         runBlocking {
             userDataRepository.setShouldHideOnboarding(true)
-
             userDataRepository.setFollowedTopicIds(
                 setOf(topicsRepository.getTopics().first().first().id),
             )
         }
-
-        // Make time zone deterministic in tests
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+        lateinit var scope: CoroutineScope
+        val snackbarHostState = SnackbarHostState()
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalInspectionMode provides true,
+                LocalSnackbarHostState provides snackbarHostState,
+            ) {
+                scope = rememberCoroutineScope()
 
-        fun testSnackbarScreenshotWithSize(
-            width: Dp,
-            height: Dp,
-            screenshotName: String,
-            action: suspend (snackbarHostState: SnackbarHostState) -> Unit,
-        ) {
-            lateinit var scope: CoroutineScope
-            val snackbarHostState = SnackbarHostState()
-            composeTestRule.setContent {
-                CompositionLocalProvider(
-                    // Replaces images with placeholders
-                    LocalInspectionMode provides true,
-                    LocalSnackbarHostState provides snackbarHostState,
-
+                DeviceConfigurationOverride(
+                    DeviceConfigurationOverride.ForcedSize(DpSize(width, height)),
                 ) {
-                    scope = rememberCoroutineScope()
-
-                    DeviceConfigurationOverride(
-                        DeviceConfigurationOverride.ForcedSize(DpSize(width, height)),
-                    ) {
-                        BoxWithConstraints {
-                            NiaTheme {
-                                val appState = rememberNiaAppState(
-                                    networkMonitor = networkMonitor,
-                                    userNewsResourceRepository = userNewsResourceRepository,
-                                    timeZoneMonitor = timeZoneMonitor,
-                                )
-                                NiaApp(
-                                    appState = appState,
-                                    showSettingsDialog = false,
-                                    onSettingsDismissed = {},
-                                    onTopAppBarActionClick = {},
-                                    windowAdaptiveInfo = WindowAdaptiveInfo(
-                                        windowSizeClass = WindowSizeClass.compute(
-                                            maxWidth.value,
-                                            maxHeight.value,
-                                        ),
-                                        windowPosture = Posture(),
+                    BoxWithConstraints {
+                        NiaTheme {
+                            val appState = rememberNiaAppState(
+                                networkMonitor = networkMonitor,
+                                userNewsResourceRepository = userNewsResourceRepository,
+                                timeZoneMonitor = timeZoneMonitor,
+                            )
+                            NiaApp(
+                                appState = appState,
+                                showSettingsDialog = false,
+                                onSettingsDismissed = {},
+                                onTopAppBarActionClick = {},
+                                windowAdaptiveInfo = WindowAdaptiveInfo(
+                                    windowSizeClass = WindowSizeClass.compute(
+                                        maxWidth.value,
+                                        maxHeight.value,
                                     ),
-                                )
-                            }
+                                    windowPosture = Posture(),
+                                ),
+                            )
                         }
                     }
                 }
             }
-
-            scope.launch {
-                action(snackbarHostState)
-            }
-
-            composeTestRule.onRoot()
-                .captureRoboImage(
-                    "src/testDemo/screenshots/$screenshotName.png",
-                    roborazziOptions = DefaultRoborazziOptions,
-                )
         }
 
-        test("phone no snackbar") {
-            testSnackbarScreenshotWithSize(
-                400.dp,
-                500.dp,
-                "snackbar_compact_medium_noSnackbar",
-                action = { },
+        scope.launch { action(snackbarHostState) }
+
+        composeTestRule.onRoot()
+            .captureRoboImage(
+                "src/testDemo/screenshots/$screenshotName.png",
+                roborazziOptions = DefaultRoborazziOptions,
             )
-        }
-
-        test("snackbar shown phone") {
-            testSnackbarScreenshotWithSize(
-                400.dp,
-                500.dp,
-                "snackbar_compact_medium",
-            ) { snackbarHostState ->
-                snackbarHostState.showSnackbar(
-                    "This is a test snackbar message",
-                    actionLabel = "Action Label",
-                    duration = Indefinite,
-                )
-            }
-        }
-
-        test("snackbar shown foldable") {
-            testSnackbarScreenshotWithSize(
-                600.dp,
-                600.dp,
-                "snackbar_medium_medium",
-            ) { snackbarHostState ->
-                snackbarHostState.showSnackbar(
-                    "This is a test snackbar message",
-                    actionLabel = "Action Label",
-                    duration = Indefinite,
-                )
-            }
-        }
-
-        test("snackbar shown tablet") {
-            testSnackbarScreenshotWithSize(
-                900.dp,
-                900.dp,
-                "snackbar_expanded_expanded",
-            ) { snackbarHostState ->
-                snackbarHostState.showSnackbar(
-                    "This is a test snackbar message",
-                    actionLabel = "Action Label",
-                    duration = Indefinite,
-                )
-            }
-        }
     }
 }

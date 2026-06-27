@@ -62,7 +62,7 @@ val TopicViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiStateTopic_whenSuccess_matchesTopicFromRepository") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
 
             topicsRepository.sendTopics(testInputTopics.map(FollowableTopic::topic))
             userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
@@ -85,14 +85,14 @@ val TopicViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiStateTopic_whenFollowedIdsSuccessAndTopicLoading_thenShowLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
 
             userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
             assertEquals(TopicUiState.Loading, viewModel.topicUiState.value)
         }
 
         test("uiStateTopic_whenFollowedIdsSuccessAndTopicSuccess_thenTopicSuccessAndNewsLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
 
             topicsRepository.sendTopics(testInputTopics.map { it.topic })
             userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
@@ -104,7 +104,7 @@ val TopicViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiStateTopic_whenFollowedIdsSuccessAndTopicSuccessAndNewsIsSuccess_thenAllSuccess") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) {
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) {
                 combine(
                     viewModel.topicUiState,
                     viewModel.newsUiState,
@@ -122,7 +122,7 @@ val TopicViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("uiStateTopic_whenFollowingTopic_thenShowUpdatedTopic") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
 
             topicsRepository.sendTopics(testInputTopics.map { it.topic })
             // Set which topic IDs are followed, not including 0.

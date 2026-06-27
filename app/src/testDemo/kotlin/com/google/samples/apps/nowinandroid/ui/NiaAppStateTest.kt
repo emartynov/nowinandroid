@@ -29,23 +29,23 @@ import com.google.samples.apps.nowinandroid.core.testing.util.TestTimeZoneMonito
 import com.google.samples.apps.nowinandroid.feature.bookmarks.api.navigation.BookmarksNavKey
 import com.google.samples.apps.nowinandroid.feature.foryou.api.navigation.ForYouNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
-import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.robolectric
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.datetime.TimeZone
-import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 
 /**
  * Tests [NiaAppState].
  */
-@Config(application = HiltTestApplication::class)
-@HiltAndroidTest
-val NiaAppStateTest by testSuite {
+val NiaAppStateTest by testSuite(
+    testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric {
+        application = HiltTestApplication::class
+    },
+) {
     testFixture {
         object : JUnit4RulesContext() {
             val composeTestRule = rule(createComposeRule())
@@ -73,7 +73,7 @@ val NiaAppStateTest by testSuite {
             composeTestRule.setContent {
                 state = remember(navigationState) {
                     NiaAppState(
-                        coroutineScope = backgroundScope,
+                        coroutineScope = it,
                         networkMonitor = networkMonitor,
                         userNewsResourceRepository = userNewsResourceRepository,
                         timeZoneMonitor = timeZoneMonitor,
@@ -119,7 +119,7 @@ val NiaAppStateTest by testSuite {
 
             composeTestRule.setContent {
                 state = NiaAppState(
-                    coroutineScope = backgroundScope,
+                    coroutineScope = it,
                     networkMonitor = networkMonitor,
                     userNewsResourceRepository = userNewsResourceRepository,
                     timeZoneMonitor = timeZoneMonitor,
@@ -127,7 +127,7 @@ val NiaAppStateTest by testSuite {
                 )
             }
 
-            backgroundScope.launch { state.isOffline.collect() }
+            it.launch { state.isOffline.collect() }
             networkMonitor.setConnected(false)
             assertEquals(
                 true,
@@ -140,7 +140,7 @@ val NiaAppStateTest by testSuite {
 
             composeTestRule.setContent {
                 state = NiaAppState(
-                    coroutineScope = backgroundScope,
+                    coroutineScope = it,
                     networkMonitor = networkMonitor,
                     userNewsResourceRepository = userNewsResourceRepository,
                     timeZoneMonitor = timeZoneMonitor,
@@ -148,7 +148,7 @@ val NiaAppStateTest by testSuite {
                 )
             }
             val changedTz = TimeZone.of("Europe/Prague")
-            backgroundScope.launch { state.currentTimeZone.collect() }
+            it.launch { state.currentTimeZone.collect() }
             timeZoneMonitor.setTimeZone(changedTz)
             assertEquals(
                 changedTz,

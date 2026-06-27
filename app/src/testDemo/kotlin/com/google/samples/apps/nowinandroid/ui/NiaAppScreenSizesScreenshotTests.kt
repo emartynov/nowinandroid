@@ -40,101 +40,34 @@ import com.google.samples.apps.nowinandroid.uitesthiltmanifest.HiltComponentActi
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
 import java.util.TimeZone
 import javax.inject.Inject
 
 /**
  * Tests that the navigation UI is rendered correctly on different screen sizes.
  */
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-// Configure Robolectric to use a very large screen size that can fit all of the test sizes.
-// This allows enough room to render the content under test without clipping or scaling.
-@Config(application = HiltTestApplication::class, qualifiers = "w1000dp-h1000dp-480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
-@HiltAndroidTest
 val NiaAppScreenSizesScreenshotTests by testSuite {
-    testFixture {
-        object : JUnit4RulesContext() {
-            val hiltRule = rule(HiltAndroidRule(this), order = 0)
+    robolectricTestSuite<NiaAppScreenSizesScreenshotTestsContent>(
+        "NiaApp screen sizes screenshot tests",
+        // Configure Robolectric to use a very large screen size that can fit all of the test sizes.
+        // This allows enough room to render the content under test without clipping or scaling.
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "w1000dp-h1000dp-480dpi"
+        },
+    )
+}
 
-            /**
-             * Use a test activity to set the content on.
-             */
-            val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>(), order = 1)
-
-            @Inject
-            lateinit var networkMonitor: NetworkMonitor
-
-            @Inject
-            lateinit var timeZoneMonitor: TimeZoneMonitor
-
-            @Inject
-            lateinit var userDataRepository: UserDataRepository
-
-            @Inject
-            lateinit var topicsRepository: TopicsRepository
-
-            @Inject
-            lateinit var userNewsResourceRepository: UserNewsResourceRepository
-        }
-    } asContextForEach {
-        hiltRule.inject()
-
-        // Configure user data
-        runBlocking {
-            userDataRepository.setShouldHideOnboarding(true)
-
-            userDataRepository.setFollowedTopicIds(
-                setOf(topicsRepository.getTopics().first().first().id),
-            )
-        }
-
-        // Make time zone deterministic in tests
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-
-        fun testNiaAppScreenshotWithSize(width: Dp, height: Dp, screenshotName: String) {
-            composeTestRule.setContent {
-                CompositionLocalProvider(
-                    LocalInspectionMode provides true,
-                ) {
-                    DeviceConfigurationOverride(
-                        override = DeviceConfigurationOverride.ForcedSize(DpSize(width, height)),
-                    ) {
-                        NiaTheme {
-                            val fakeAppState = rememberNiaAppState(
-                                networkMonitor = networkMonitor,
-                                userNewsResourceRepository = userNewsResourceRepository,
-                                timeZoneMonitor = timeZoneMonitor,
-                            )
-                            NiaApp(
-                                fakeAppState,
-                                windowAdaptiveInfo = WindowAdaptiveInfo(
-                                    windowSizeClass = WindowSizeClass.compute(
-                                        width.value,
-                                        height.value,
-                                    ),
-                                    windowPosture = Posture(),
-                                ),
-                            )
-                        }
-                    }
-                }
-            }
-
-            composeTestRule.onRoot()
-                .captureRoboImage(
-                    "src/testDemo/screenshots/$screenshotName.png",
-                    roborazziOptions = DefaultRoborazziOptions,
-                )
-        }
-
+class NiaAppScreenSizesScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture { NiaAppScreenSizesFixture() } asContextForEach {
         for ((width, height, screenshotName) in listOf(
             Triple(400.dp, 400.dp, "compactWidth_compactHeight_showsNavigationBar"),
             Triple(610.dp, 400.dp, "mediumWidth_compactHeight_showsNavigationBar"),
@@ -146,7 +79,57 @@ val NiaAppScreenSizesScreenshotTests by testSuite {
             Triple(610.dp, 1000.dp, "mediumWidth_expandedHeight_showsNavigationRail"),
             Triple(900.dp, 1000.dp, "expandedWidth_expandedHeight_showsNavigationRail"),
         )) {
-            test(screenshotName) { testNiaAppScreenshotWithSize(width, height, screenshotName) }
+            test(screenshotName) { captureScreenshot(width, height, screenshotName) }
         }
+    }
+})
+
+@HiltAndroidTest
+class NiaAppScreenSizesFixture : JUnit4RulesContext() {
+    val hiltRule = rule(HiltAndroidRule(this))
+    val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
+
+    @Inject lateinit var networkMonitor: NetworkMonitor
+    @Inject lateinit var timeZoneMonitor: TimeZoneMonitor
+    @Inject lateinit var userDataRepository: UserDataRepository
+    @Inject lateinit var topicsRepository: TopicsRepository
+    @Inject lateinit var userNewsResourceRepository: UserNewsResourceRepository
+
+    fun captureScreenshot(width: Dp, height: Dp, screenshotName: String) {
+        hiltRule.inject()
+        runBlocking {
+            userDataRepository.setShouldHideOnboarding(true)
+            userDataRepository.setFollowedTopicIds(
+                setOf(topicsRepository.getTopics().first().first().id),
+            )
+        }
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalInspectionMode provides true) {
+                DeviceConfigurationOverride(
+                    override = DeviceConfigurationOverride.ForcedSize(DpSize(width, height)),
+                ) {
+                    NiaTheme {
+                        val fakeAppState = rememberNiaAppState(
+                            networkMonitor = networkMonitor,
+                            userNewsResourceRepository = userNewsResourceRepository,
+                            timeZoneMonitor = timeZoneMonitor,
+                        )
+                        NiaApp(
+                            fakeAppState,
+                            windowAdaptiveInfo = WindowAdaptiveInfo(
+                                windowSizeClass = WindowSizeClass.compute(width.value, height.value),
+                                windowPosture = Posture(),
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+        composeTestRule.onRoot()
+            .captureRoboImage(
+                "src/testDemo/screenshots/$screenshotName.png",
+                roborazziOptions = DefaultRoborazziOptions,
+            )
     }
 }

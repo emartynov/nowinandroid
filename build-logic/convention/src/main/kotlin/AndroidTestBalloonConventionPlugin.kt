@@ -19,9 +19,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class AndroidTestBalloonConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -29,6 +26,7 @@ class AndroidTestBalloonConventionPlugin : Plugin<Project> {
             apply(plugin = "de.infix.testBalloon")
             dependencies {
                 "testImplementation"(libs.findLibrary("testBalloon-framework-core").get())
+                "testImplementation"(libs.findLibrary("junit").get())
             }
         }
     }

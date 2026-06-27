@@ -86,8 +86,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("stateIsLoadingWhenFollowedTopicsAreLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
 
@@ -101,7 +101,7 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         test("stateIsLoadingWhenAppIsSyncingWithNoInterests") {
             syncManager.setSyncing(true)
 
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.isSyncing.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.isSyncing.collect() }
 
             assertEquals(
                 true,
@@ -110,8 +110,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("onboardingStateIsLoadingWhenTopicsAreLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             userDataRepository.setFollowedTopicIds(emptySet())
 
@@ -123,8 +123,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("onboardingIsShownWhenNewsResourcesAreLoading") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
             userDataRepository.setFollowedTopicIds(emptySet())
@@ -178,8 +178,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("onboardingIsShownAfterLoadingEmptyFollowedTopics") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
             userDataRepository.setFollowedTopicIds(emptySet())
@@ -234,8 +234,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("onboardingIsNotShownAfterUserDismissesOnboarding") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
 
@@ -265,8 +265,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("topicSelectionUpdatesAfterSelectingTopic") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
             userDataRepository.setFollowedTopicIds(emptySet())
@@ -313,8 +313,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("topicSelectionUpdatesAfterUnselectingTopic") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             topicsRepository.sendTopics(sampleTopics)
             userDataRepository.setFollowedTopicIds(emptySet())
@@ -322,7 +322,7 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
             viewModel.updateTopicSelection("1", isChecked = true)
             viewModel.updateTopicSelection("1", isChecked = false)
 
-            advanceUntilIdle()
+            it.testScope.advanceUntilIdle()
             assertEquals(
                 OnboardingUiState.Shown(
                     topics = listOf(
@@ -372,8 +372,8 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("newsResourceSelectionUpdatesAfterLoadingFollowedTopics") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
             val followedTopicIds = setOf("1")
             val userData = emptyUserData.copy(
@@ -411,7 +411,7 @@ val ForYouViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("deepLinkedNewsResourceIsFetchedAndResetAfterViewing") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.deepLinkedNewsResource.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.deepLinkedNewsResource.collect() }
 
             newsRepository.sendNewsResources(sampleNewsResources)
             userDataRepository.setUserData(emptyUserData)

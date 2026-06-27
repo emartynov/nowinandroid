@@ -57,7 +57,7 @@ val BookmarksViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("oneBookmark_showsInFeed") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
 
             newsRepository.sendNewsResources(newsResourcesTestData)
             userDataRepository.setNewsResourceBookmarked(newsResourcesTestData[0].id, true)
@@ -67,7 +67,7 @@ val BookmarksViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("oneBookmark_whenRemoving_removesFromFeed") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
             // Set the news resources to be used by this test
             newsRepository.sendNewsResources(newsResourcesTestData)
             // Start with the resource saved
@@ -82,7 +82,7 @@ val BookmarksViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("feedUiState_resourceIsViewed_setResourcesViewed") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
 
             // Given
             newsRepository.sendNewsResources(newsResourcesTestData)
@@ -101,7 +101,7 @@ val BookmarksViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("feedUiState_undoneBookmarkRemoval_bookmarkIsRestored") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedUiState.collect() }
 
             // Given
             newsRepository.sendNewsResources(newsResourcesTestData)

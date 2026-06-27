@@ -40,7 +40,7 @@ val SettingsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
         }
 
         test("state is success after user data loaded") {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.settingsUiState.collect() }
+            it.testScope.backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.settingsUiState.collect() }
 
             userDataRepository.setThemeBrand(ANDROID)
             userDataRepository.setDarkThemeConfig(DARK)
