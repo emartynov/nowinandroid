@@ -24,7 +24,7 @@ import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import de.infix.testBalloon.framework.core.testSuite
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
