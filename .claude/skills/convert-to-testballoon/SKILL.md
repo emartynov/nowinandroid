@@ -247,6 +247,10 @@ niaDbFixture() asContextForEach {
 }
 ```
 
+**Important**: This only applies to `testSuite { }`. In `RobolectricTestSuiteContent`, the
+`asContextForEach { }` body does NOT have the fixture as implicit `this` — see Pattern 8 for
+the correct approach there.
+
 ### 5. Coroutine tests (`runTest`)
 
 testBalloon gives every test body a `TestScope` automatically. Just remove the `runTest { }` wrapper.
@@ -339,16 +343,22 @@ Note: Only use this for rules you can't change. Avoid creating new JUnit rules; 
 ```kotlin
 testFixture {
     object : JUnit4RulesContext() {
-        val hiltRule = rule(HiltAndroidRule(this), order = 0)
-        val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>(), order = 1)
+        // Declaration order = rule execution order (no `order` parameter in K2.4.0+)
+        val hiltRule = rule(HiltAndroidRule(this))
+        val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
 
         @Inject lateinit var repository: MyRepository
     }
 } asContextForEach {
-    hiltRule.inject()  // must be called before test code accesses @Inject fields
-    test("...") { ... }
+    test("...") {
+        hiltRule.inject()  // must be called before accessing @Inject fields
+        // test code here
+    }
 }
 ```
+
+**K2.4.0-SNAPSHOT API note**: `rule()` no longer has an `order` parameter — execution order
+follows declaration order instead.
 
 ### 6c. Test isolation — mutable state MUST be in `testFixture`
 
@@ -434,23 +444,44 @@ dependencies {
 }
 ```
 
-**`robolectric.properties`** — for graphics/looper mode (these are NOT in `TestConfig.robolectric { }`):
+**`robolectric.properties`** — for graphics/looper mode and application (these are NOT supported
+by `TestConfig.robolectric { }` or by annotations on testBalloon types):
 ```properties
-# core/yourmodule/src/test/resources/robolectric.properties
+# yourmodule/src/test/resources/robolectric.properties
 sdk = 35
 nativeGraphicsMode = NATIVE
 looperMode = PAUSED
+# Set `application` here too if testBalloon-integration-robolectric is NOT on the classpath:
+application = dagger.hilt.android.testing.HiltTestApplication
 ```
 
-**Full pattern:**
-```kotlin
-import de.infix.testBalloon.framework.core.JUnit4RulesContext
-import de.infix.testBalloon.framework.core.TestConfig
-import de.infix.testBalloon.framework.core.testSuite
-import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
-import de.infix.testBalloon.integration.robolectric.robolectric   // MUST import explicitly
-import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
+Use `robolectric.properties` when the module does NOT have `testBalloon-integration-robolectric`
+as a direct dependency (i.e., `TestConfig.robolectric { }` is unavailable). Use
+`TestConfig.robolectric { application = ...; qualifiers = ... }` when the integration library is
+present and you need per-suite configuration.
 
+**`asContextForEach` scope in `RobolectricTestSuiteContent`** — CRITICAL:
+In `RobolectricTestSuiteContent`, the `asContextForEach { }` body is purely for registering
+`test { }` blocks. It does NOT have the fixture as implicit `this`. Only inside each `test { }`
+body is the fixture in scope:
+
+```kotlin
+class FooTestsContent : RobolectricTestSuiteContent({
+    testFixture { FooFixture() } asContextForEach {
+        fixture.doSomething()  // WRONG — fixture not in scope here
+
+        test("works") {
+            doSomething()      // RIGHT — fixture is `this` inside test { }
+        }
+    }
+})
+```
+
+The correct place for per-test setup (inject, configure state) is inside a fixture method called
+from within the `test { }` body.
+
+**Simple Robolectric pattern** (no Hilt, no field injection):
+```kotlin
 val FooScreenshotTests by testSuite {
     robolectricTestSuite<FooScreenshotTestsContent>(
         "Foo screenshot tests",
@@ -474,9 +505,57 @@ class FooScreenshotTestsContent : RobolectricTestSuiteContent({
 })
 ```
 
+**Hilt + Robolectric pattern** (with field injection):
+
+Use a **named fixture class** (not an anonymous object). Anonymous objects suffer from Kotlin
+generic type erasure — `T` is inferred as the supertype (`JUnit4RulesContext`), making declared
+properties invisible outside `test { }`. A named class gives a concrete `T` that resolves all
+properties.
+
+Put `@HiltAndroidTest` on the **fixture class** (where `@Inject` fields live), not on the content
+class. Put setup code (`hiltRule.inject()`, `runBlocking { }`, `TimeZone.setDefault()`) in a
+fixture method — that method is then called from inside each `test { }` body:
+
+```kotlin
+val FooScreenshotTests by testSuite {
+    robolectricTestSuite<FooScreenshotTestsContent>(
+        "Foo screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "w1000dp-h1000dp-480dpi"
+        },
+    )
+}
+
+class FooScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture { FooFixture() } asContextForEach {
+        test("renders correctly") { captureScreenshot("foo") }
+    }
+})
+
+@HiltAndroidTest
+class FooFixture : JUnit4RulesContext() {
+    // Declaration order = rule execution order
+    val hiltRule = rule(HiltAndroidRule(this))
+    val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
+
+    @Inject lateinit var repository: FooRepository
+
+    // Setup + capture live together in the fixture method
+    fun captureScreenshot(name: String) {
+        hiltRule.inject()           // called here, not in asContextForEach body
+        runBlocking { repository.configure() }
+        composeTestRule.setContent { FooComposable(repository) }
+        composeTestRule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
+    }
+}
+```
+
 **Key details:**
 - `RobolectricSettings` builder only has `sdk`, `fontScale`, `application`, `qualifiers` — no `graphicsMode`/`looperMode`
-- `@Config`, `@GraphicsMode`, `@LooperMode` annotations do NOT work on testBalloon top-level properties or content classes — use `robolectric.properties` instead
+- `@Config`, `@GraphicsMode`, `@LooperMode`, `@HiltAndroidTest` annotations do NOT work on
+  testBalloon top-level property delegates or content classes under K2 — use `robolectric.properties`
+  for mode/sdk; put `@HiltAndroidTest` on the named fixture class
 - The `robolectric` import (`import ...integration.robolectric.robolectric`) is required for `TestConfig.robolectric { }` to resolve
 - `JUnit4RulesContext` is from `de.infix.testBalloon.framework.core`, NOT from the robolectric integration package
 
