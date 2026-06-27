@@ -28,6 +28,7 @@ class AndroidFeatureImplConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = "nowinandroid.android.library")
             apply(plugin = "nowinandroid.hilt")
+            apply(plugin = "nowinandroid.android.testballoon")
 
             extensions.configure<LibraryExtension> {
                 testOptions.animationsDisabled = true

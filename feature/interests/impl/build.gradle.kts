@@ -37,6 +37,7 @@ dependencies {
     testImplementation(projects.core.testing)
     testImplementation(projects.core.dataTest)
     testImplementation(libs.robolectric)
+    testImplementation(libs.testBalloon.integration.robolectric)
     testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.androidx.test.espresso.core)
     testImplementation(libs.hilt.android.testing)

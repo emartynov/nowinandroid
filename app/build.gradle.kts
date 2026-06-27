@@ -123,6 +123,7 @@ dependencies {
 
     testDemoImplementation(libs.androidx.navigation.testing)
     testDemoImplementation(libs.robolectric)
+    testDemoImplementation(libs.testBalloon.integration.robolectric)
     testDemoImplementation(libs.roborazzi)
     testDemoImplementation(projects.core.screenshotTesting)
     testDemoImplementation(projects.core.testing)
