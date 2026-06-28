@@ -17,7 +17,6 @@
 package com.google.samples.apps.nowinandroid.interests.impl
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.testing.invoke
 import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
