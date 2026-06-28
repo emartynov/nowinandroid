@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.samples.apps.nowinandroid.core.network.model
 
 import android.annotation.SuppressLint

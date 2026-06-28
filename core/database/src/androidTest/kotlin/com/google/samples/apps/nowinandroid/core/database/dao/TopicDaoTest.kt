@@ -104,4 +104,3 @@ internal val TopicDaoTest by testSuite {
         }
     }
 }
-

@@ -115,9 +115,13 @@ class SnackbarScreenshotFixture : JUnit4RulesContext() {
     val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
 
     @Inject lateinit var networkMonitor: NetworkMonitor
+
     @Inject lateinit var timeZoneMonitor: TimeZoneMonitor
+
     @Inject lateinit var userDataRepository: FakeUserDataRepository
+
     @Inject lateinit var topicsRepository: TopicsRepository
+
     @Inject lateinit var userNewsResourceRepository: UserNewsResourceRepository
 
     fun captureSnackbarScreenshot(

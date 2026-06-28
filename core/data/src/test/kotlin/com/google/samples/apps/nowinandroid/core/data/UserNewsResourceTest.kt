@@ -24,9 +24,9 @@ import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import de.infix.testBalloon.framework.core.testSuite
-import kotlin.time.Clock
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 val UserNewsResourceTest by testSuite {
 

@@ -40,10 +40,10 @@ import com.google.samples.apps.nowinandroid.uitesthiltmanifest.HiltComponentActi
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import de.infix.testBalloon.framework.core.TestConfig
-import de.infix.testBalloon.framework.core.testSuite
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.disable
+import de.infix.testBalloon.framework.core.testSuite
 import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
 import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
@@ -93,9 +93,13 @@ class NiaAppScreenSizesFixture : JUnit4RulesContext() {
     val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
 
     @Inject lateinit var networkMonitor: NetworkMonitor
+
     @Inject lateinit var timeZoneMonitor: TimeZoneMonitor
+
     @Inject lateinit var userDataRepository: UserDataRepository
+
     @Inject lateinit var topicsRepository: TopicsRepository
+
     @Inject lateinit var userNewsResourceRepository: UserNewsResourceRepository
 
     fun captureScreenshot(width: Dp, height: Dp, screenshotName: String) {

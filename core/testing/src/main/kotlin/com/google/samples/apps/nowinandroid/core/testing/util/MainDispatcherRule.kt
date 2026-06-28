@@ -44,11 +44,11 @@ class MainDispatcherRule(
 val mainDispatcherTestConfig = TestConfig
     .testScope(isEnabled = true)
     .aroundEachTest { action ->
-    val testDispatcher = UnconfinedTestDispatcher()
-    Dispatchers.setMain(testDispatcher)
-    try {
-        action()
-    } finally {
-        Dispatchers.resetMain()
+        val testDispatcher = UnconfinedTestDispatcher()
+        Dispatchers.setMain(testDispatcher)
+        try {
+            action()
+        } finally {
+            Dispatchers.resetMain()
+        }
     }
-}

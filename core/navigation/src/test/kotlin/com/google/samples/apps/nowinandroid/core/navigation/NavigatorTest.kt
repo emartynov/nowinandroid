@@ -59,12 +59,14 @@ val NavigatorTest by testSuite {
         test("navigate single top") {
             navigator.navigate(TestKeyFirst)
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
 
             navigator.navigate(TestKeyFirst)
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
         }
 
@@ -72,7 +74,8 @@ val NavigatorTest by testSuite {
             navigator.navigate(TestSecondTopLevelKey)
             navigator.navigate(TestKeyFirst)
             assertThat(state.currentSubStack).containsExactly(
-                TestSecondTopLevelKey, TestKeyFirst,
+                TestSecondTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
 
             navigator.navigate(TestSecondTopLevelKey)
@@ -113,12 +116,15 @@ val NavigatorTest by testSuite {
             navigator.navigate(TestKeyFirst)
             navigator.navigate(TestKeySecond)
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst, TestKeySecond,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
+                TestKeySecond,
             ).inOrder()
 
             navigator.goBack()
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
             assertThat(state.currentKey).isEqualTo(TestKeyFirst)
             assertThat(state.currentTopLevelKey).isEqualTo(TestFirstTopLevelKey)
@@ -133,7 +139,8 @@ val NavigatorTest by testSuite {
 
             navigator.goBack()
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
             assertThat(state.currentKey).isEqualTo(TestKeyFirst)
             assertThat(state.currentTopLevelKey).isEqualTo(TestFirstTopLevelKey)
@@ -143,7 +150,9 @@ val NavigatorTest by testSuite {
             navigator.navigate(TestKeyFirst)
             navigator.navigate(TestKeySecond)
             assertThat(state.currentSubStack).containsExactly(
-                TestFirstTopLevelKey, TestKeyFirst, TestKeySecond,
+                TestFirstTopLevelKey,
+                TestKeyFirst,
+                TestKeySecond,
             ).inOrder()
 
             navigator.goBack()
@@ -157,13 +166,15 @@ val NavigatorTest by testSuite {
             navigator.navigate(TestSecondTopLevelKey)
             navigator.navigate(TestKeyFirst)
             assertThat(state.currentSubStack).containsExactly(
-                TestSecondTopLevelKey, TestKeyFirst,
+                TestSecondTopLevelKey,
+                TestKeyFirst,
             ).inOrder()
 
             navigator.navigate(TestThirdTopLevelKey)
             navigator.navigate(TestKeySecond)
             assertThat(state.currentSubStack).containsExactly(
-                TestThirdTopLevelKey, TestKeySecond,
+                TestThirdTopLevelKey,
+                TestKeySecond,
             ).inOrder()
 
             repeat(4) { navigator.goBack() }

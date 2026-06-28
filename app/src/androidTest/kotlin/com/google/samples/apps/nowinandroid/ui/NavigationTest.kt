@@ -18,7 +18,6 @@ package com.google.samples.apps.nowinandroid.ui
 
 import androidx.compose.ui.semantics.SemanticsActions.ScrollBy
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
@@ -38,9 +37,7 @@ import com.google.samples.apps.nowinandroid.MainActivity
 import com.google.samples.apps.nowinandroid.R
 import com.google.samples.apps.nowinandroid.core.data.repository.NewsRepository
 import com.google.samples.apps.nowinandroid.core.data.repository.TopicsRepository
-import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.rules.GrantPostNotificationsPermissionRule
-import com.google.samples.apps.nowinandroid.feature.interests.impl.LIST_PANE_TEST_TAG
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
@@ -77,6 +74,7 @@ val NavigationTest by testSuite {
             val composeTestRule = rule(createAndroidComposeRule<MainActivity>(), order = 2)
 
             @Inject lateinit var topicsRepository: TopicsRepository
+
             @Inject lateinit var newsRepository: NewsRepository
 
             // The strings used for matching in these tests

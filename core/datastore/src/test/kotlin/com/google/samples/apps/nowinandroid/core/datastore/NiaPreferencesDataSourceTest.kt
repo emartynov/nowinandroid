@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
 val NiaPreferencesDataSourceTest by testSuite {
     testFixture {
         NiaPreferencesDataSource(InMemoryDataStore(UserPreferences.getDefaultInstance()))
-    } asContextForEach { 
+    } asContextForEach {
 
         test("shouldHideOnboardingIsFalseByDefault") {
             assertFalse(userData.first().shouldHideOnboarding)

@@ -52,7 +52,7 @@ val userNewsResourcesTestData: List<UserNewsResource> = UserData(
                     hour = 23,
                     minute = 0,
                     second = 0,
-                    nanosecond = 0
+                    nanosecond = 0,
                 ).toInstant(TimeZone.UTC),
                 type = "Codelab",
                 topics = listOf(topicsTestData[2]),

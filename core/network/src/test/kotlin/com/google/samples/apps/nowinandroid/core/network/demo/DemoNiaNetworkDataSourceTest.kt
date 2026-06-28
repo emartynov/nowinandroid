@@ -66,7 +66,7 @@ val DemoNiaNetworkDataSourceTest by testSuite {
                         hour = 23,
                         minute = 0,
                         second = 0,
-                        nanosecond = 0
+                        nanosecond = 0,
                     ).toInstant(TimeZone.UTC),
                     type = "Codelab",
                     topics = listOf("2", "3", "10"),
