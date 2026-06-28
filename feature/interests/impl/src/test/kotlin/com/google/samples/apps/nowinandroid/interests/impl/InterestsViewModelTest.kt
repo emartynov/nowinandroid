@@ -28,7 +28,6 @@ import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.Int
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsViewModel
 import de.infix.testBalloon.framework.core.testSuite
-import de.infix.testBalloon.integration.robolectric.robolectric
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,14 +36,8 @@ import kotlin.test.assertEquals
 /**
  * To learn more about how this test handles Flows created with stateIn, see
  * https://developer.android.com/kotlin/flow/test#statein
- *
- * These tests use Robolectric because the subject under test (the ViewModel) uses
- * `SavedStateHandle.toRoute` which has a dependency on `android.os.Bundle`.
- *
- * TODO: Remove Robolectric if/when AndroidX Navigation API is updated to remove Android dependency.
- *  See https://issuetracker.google.com/340966212.
  */
-val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig.robolectric { sdk = 35 }) {
+val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig) {
     testFixture {
         object {
             val userDataRepository = TestUserDataRepository()
@@ -54,9 +47,7 @@ val InterestsViewModelTest by testSuite(testConfig = mainDispatcherTestConfig.ro
                 userDataRepository = userDataRepository,
             )
             val viewModel = InterestsViewModel(
-                savedStateHandle = SavedStateHandle(
-                    route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
-                ),
+                savedStateHandle = SavedStateHandle(mapOf()),
                 userDataRepository = userDataRepository,
                 getFollowableTopics = getFollowableTopicsUseCase,
                 InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),

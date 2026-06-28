@@ -598,8 +598,18 @@ val FooTest by testSuite {
 - **`@ExtendWith` JUnit 5 extensions**: convert to `TestConfig.aroundEachTest { }` decorator
 - **Abstract test base classes**: testBalloon doesn't need inheritance — extract shared fixtures
   into top-level functions and call them from each suite
-- **`@Ignore` / `@Disabled`**: no direct equivalent; comment out the test or use a `if (false)`
-  guard and leave a TODO
+- **`@Ignore` / `@Disabled`**: chain `.disable()` on the `TestConfig` and leave a TODO comment:
+  ```kotlin
+  val FooTest by testSuite {
+      robolectricTestSuite<FooContent>(
+          "Foo tests",
+          testConfig = TestConfig.robolectric { ... }
+  // TODO: re-enable when <reason>
+              .disable(),
+      )
+  }
+  ```
+  Import: `import de.infix.testBalloon.framework.core.disable`
 - **`@Order`**: not needed — testBalloon runs in source order by default
 
 ---

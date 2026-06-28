@@ -74,6 +74,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
 import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.disable
 import de.infix.testBalloon.framework.core.testSuite
 import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
@@ -91,12 +92,12 @@ import javax.inject.Inject
 val SnackbarInsetsScreenshotTests by testSuite {
     robolectricTestSuite<SnackbarInsetsScreenshotTestsContent>(
         "Snackbar insets screenshot tests",
-        // Configure Robolectric to use a very large screen size that can fit all of the test sizes.
-        // This allows enough room to render the content under test without clipping or scaling.
         testConfig = TestConfig.robolectric {
             application = HiltTestApplication::class
             qualifiers = "w1000dp-h1000dp-480dpi"
-        },
+        }
+// TODO: re-enable when https://github.com/infix-de/testBalloon/issues/86 is fixed
+            .disable(),
     )
 }
 

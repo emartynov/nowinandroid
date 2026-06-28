@@ -43,6 +43,7 @@ import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.disable
 import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
 import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
@@ -57,32 +58,34 @@ import javax.inject.Inject
 val NiaAppScreenSizesScreenshotTests by testSuite {
     robolectricTestSuite<NiaAppScreenSizesScreenshotTestsContent>(
         "NiaApp screen sizes screenshot tests",
-        // Configure Robolectric to use a very large screen size that can fit all of the test sizes.
-        // This allows enough room to render the content under test without clipping or scaling.
         testConfig = TestConfig.robolectric {
             application = HiltTestApplication::class
             qualifiers = "w1000dp-h1000dp-480dpi"
-        },
+        }
+// TODO: re-enable when https://github.com/infix-de/testBalloon/issues/86 is fixed
+            .disable(),
     )
 }
 
-class NiaAppScreenSizesScreenshotTestsContent : RobolectricTestSuiteContent({
-    testFixture { NiaAppScreenSizesFixture() } asContextForEach {
-        for ((width, height, screenshotName) in listOf(
-            Triple(400.dp, 400.dp, "compactWidth_compactHeight_showsNavigationBar"),
-            Triple(610.dp, 400.dp, "mediumWidth_compactHeight_showsNavigationBar"),
-            Triple(900.dp, 400.dp, "expandedWidth_compactHeight_showsNavigationBar"),
-            Triple(400.dp, 500.dp, "compactWidth_mediumHeight_showsNavigationBar"),
-            Triple(610.dp, 500.dp, "mediumWidth_mediumHeight_showsNavigationRail"),
-            Triple(900.dp, 500.dp, "expandedWidth_mediumHeight_showsNavigationRail"),
-            Triple(400.dp, 1000.dp, "compactWidth_expandedHeight_showsNavigationBar"),
-            Triple(610.dp, 1000.dp, "mediumWidth_expandedHeight_showsNavigationRail"),
-            Triple(900.dp, 1000.dp, "expandedWidth_expandedHeight_showsNavigationRail"),
-        )) {
-            test(screenshotName) { captureScreenshot(width, height, screenshotName) }
+class NiaAppScreenSizesScreenshotTestsContent : RobolectricTestSuiteContent(
+    {
+        testFixture { NiaAppScreenSizesFixture() } asContextForEach {
+            for ((width, height, screenshotName) in listOf(
+                Triple(400.dp, 400.dp, "compactWidth_compactHeight_showsNavigationBar"),
+                Triple(610.dp, 400.dp, "mediumWidth_compactHeight_showsNavigationBar"),
+                Triple(900.dp, 400.dp, "expandedWidth_compactHeight_showsNavigationBar"),
+                Triple(400.dp, 500.dp, "compactWidth_mediumHeight_showsNavigationBar"),
+                Triple(610.dp, 500.dp, "mediumWidth_mediumHeight_showsNavigationRail"),
+                Triple(900.dp, 500.dp, "expandedWidth_mediumHeight_showsNavigationRail"),
+                Triple(400.dp, 1000.dp, "compactWidth_expandedHeight_showsNavigationBar"),
+                Triple(610.dp, 1000.dp, "mediumWidth_expandedHeight_showsNavigationRail"),
+                Triple(900.dp, 1000.dp, "expandedWidth_expandedHeight_showsNavigationRail"),
+            )) {
+                test(screenshotName) { captureScreenshot(width, height, screenshotName) }
+            }
         }
-    }
-})
+    },
+)
 
 @HiltAndroidTest
 class NiaAppScreenSizesFixture : JUnit4RulesContext() {
@@ -118,7 +121,10 @@ class NiaAppScreenSizesFixture : JUnit4RulesContext() {
                         NiaApp(
                             fakeAppState,
                             windowAdaptiveInfo = WindowAdaptiveInfo(
-                                windowSizeClass = WindowSizeClass.compute(width.value, height.value),
+                                windowSizeClass = WindowSizeClass.compute(
+                                    width.value,
+                                    height.value,
+                                ),
                                 windowPosture = Posture(),
                             ),
                         )

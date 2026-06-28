@@ -47,6 +47,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
 import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.disable
 import de.infix.testBalloon.framework.core.testSuite
 import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
@@ -74,7 +75,9 @@ val InterestsListDetailScreenTest by testSuite {
         testConfig = TestConfig.robolectric {
             sdk = 35
             application = HiltTestApplication::class
-        },
+        }
+// TODO: re-enable when https://github.com/infix-de/testBalloon/issues/86 is fixed
+            .disable(),
     )
 }
 

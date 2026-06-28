@@ -31,21 +31,31 @@ import com.google.samples.apps.nowinandroid.feature.foryou.api.navigation.ForYou
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import dagger.hilt.android.testing.HiltTestApplication
 import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
 import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.datetime.TimeZone
 import kotlin.test.assertEquals
 
 /**
  * Tests [NiaAppState].
  */
-val NiaAppStateTest by testSuite(
-    testConfig = de.infix.testBalloon.framework.core.TestConfig.robolectric {
-        application = HiltTestApplication::class
-    },
-) {
+val NiaAppStateTest by testSuite {
+    robolectricTestSuite<NiaAppStateTestContent>(
+        "NiaAppState tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+        },
+    )
+}
+
+class NiaAppStateTestContent : RobolectricTestSuiteContent({
     testFixture {
         object : JUnit4RulesContext() {
             val composeTestRule = rule(createComposeRule())
@@ -70,10 +80,12 @@ val NiaAppStateTest by testSuite(
             val navigator = Navigator(navigationState)
             lateinit var state: NiaAppState
 
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+
             composeTestRule.setContent {
                 state = remember(navigationState) {
                     NiaAppState(
-                        coroutineScope = it,
+                        coroutineScope = coroutineScope,
                         networkMonitor = networkMonitor,
                         userNewsResourceRepository = userNewsResourceRepository,
                         timeZoneMonitor = timeZoneMonitor,
@@ -117,9 +129,11 @@ val NiaAppStateTest by testSuite(
         test("nia app state when network monitor is offline state is offline") {
             lateinit var state: NiaAppState
 
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+
             composeTestRule.setContent {
                 state = NiaAppState(
-                    coroutineScope = it,
+                    coroutineScope = coroutineScope,
                     networkMonitor = networkMonitor,
                     userNewsResourceRepository = userNewsResourceRepository,
                     timeZoneMonitor = timeZoneMonitor,
@@ -127,7 +141,7 @@ val NiaAppStateTest by testSuite(
                 )
             }
 
-            it.launch { state.isOffline.collect() }
+            coroutineScope.launch { state.isOffline.collect() }
             networkMonitor.setConnected(false)
             assertEquals(
                 true,
@@ -138,9 +152,11 @@ val NiaAppStateTest by testSuite(
         test("nia app state different TZ with time zone monitor change") {
             lateinit var state: NiaAppState
 
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+
             composeTestRule.setContent {
                 state = NiaAppState(
-                    coroutineScope = it,
+                    coroutineScope = coroutineScope,
                     networkMonitor = networkMonitor,
                     userNewsResourceRepository = userNewsResourceRepository,
                     timeZoneMonitor = timeZoneMonitor,
@@ -148,7 +164,7 @@ val NiaAppStateTest by testSuite(
                 )
             }
             val changedTz = TimeZone.of("Europe/Prague")
-            it.launch { state.currentTimeZone.collect() }
+            coroutineScope.launch { state.currentTimeZone.collect() }
             timeZoneMonitor.setTimeZone(changedTz)
             assertEquals(
                 changedTz,
@@ -156,4 +172,4 @@ val NiaAppStateTest by testSuite(
             )
         }
     }
-}
+})
