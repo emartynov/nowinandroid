@@ -18,7 +18,7 @@ package com.google.samples.apps.nowinandroid.core.network.model
 
 import android.annotation.SuppressLint
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 /**

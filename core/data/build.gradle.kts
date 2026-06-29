@@ -33,6 +33,7 @@ dependencies {
 
     implementation(projects.core.analytics)
     implementation(projects.core.notifications)
+    implementation(libs.kotlinx.datetime)
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlinx.serialization.json)

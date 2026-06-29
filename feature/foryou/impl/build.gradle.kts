@@ -33,8 +33,11 @@ dependencies {
     implementation(projects.feature.topic.api)
     implementation(libs.androidx.activity.compose)
 
+    testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.hilt.android.testing)
     testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi.accessibility.check)
+    testImplementation(projects.core.screenshotTesting)
     testImplementation(projects.core.testing)
     testDemoImplementation(projects.core.screenshotTesting)
 

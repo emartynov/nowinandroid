@@ -26,4 +26,5 @@ dependencies {
     api(projects.core.data)
 
     implementation(libs.hilt.android.testing)
+    implementation(libs.kotlinx.datetime)
 }

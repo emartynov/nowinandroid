@@ -34,7 +34,6 @@ android {
 }
 
 dependencies {
-    api(libs.kotlinx.datetime)
     api(projects.core.common)
     api(projects.core.model)
 
@@ -46,6 +45,7 @@ dependencies {
     implementation(libs.retrofit.kotlin.serialization)
 
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.datetime)
 }
 
 val backendUrl = providers.fileContents(
