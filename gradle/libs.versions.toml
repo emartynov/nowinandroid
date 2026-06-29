@@ -46,6 +46,7 @@ hilt = "2.59"
 hiltExt = "1.2.0"
 jacoco = "0.8.15"
 junit4 = "4.13.2"
+junit5 = "5.10.5"
 kotlin = "2.4.0"
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.8.0"
@@ -138,6 +139,10 @@ hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.r
 hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 junit = { module = "junit:junit", version.ref = "junit4" }
+junit5-bom = { module = "org.junit:junit-bom", version.ref = "junit5" }
+junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit5-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine" }
 kotlin-metadata = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
@@ -162,7 +167,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-test-balloon = { group = "de.infix.testBalloon", name = "testBalloon-framework-core", version.ref = "testballoon" }
+testballoon-core = { group = "de.infix.testBalloon", name = "testBalloon-framework-core", version.ref = "testballoon" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 # Dependencies of the included build-logic
@@ -176,7 +181,7 @@ ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devto
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
-testballon-gradlePlugin = {group = "de.infix.testBalloon", name = "testBalloon", version.ref = "testballoon"}
+testballoon-gradlePlugin = {group = "de.infix.testBalloon", name = "testBalloon-gradle-plugin", version.ref = "testballoon"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -214,6 +219,7 @@ nowinandroid-android-library-jacoco = { id = "nowinandroid.android.library.jacoc
 nowinandroid-android-lint = { id = "nowinandroid.android.lint" }
 nowinandroid-android-room = { id = "nowinandroid.android.room" }
 nowinandroid-android-test = { id = "nowinandroid.android.test" }
+nowinandroid-testballoon = { id = "nowinandroid.testballon" }
 nowinandroid-hilt = { id = "nowinandroid.hilt" }
 nowinandroid-jvm-library = { id = "nowinandroid.jvm.library" }
 nowinandroid-root = { id = "nowinandroid.root" }

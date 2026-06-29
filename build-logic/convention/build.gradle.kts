@@ -46,6 +46,7 @@ dependencies {
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
+    compileOnly(libs.testballoon.gradlePlugin)
     implementation(libs.truth)
     lintChecks(libs.androidx.lint.gradle)
 }
@@ -94,6 +95,10 @@ gradlePlugin {
         register("androidTest") {
             id = libs.plugins.nowinandroid.android.test.get().pluginId
             implementationClass = "AndroidTestConventionPlugin"
+        }
+        register("testBalloon") {
+            id = libs.plugins.nowinandroid.testballoon.get().pluginId
+            implementationClass = "TestBalloonConventionPlugin"
         }
         register("hilt") {
             id = libs.plugins.nowinandroid.hilt.get().pluginId
