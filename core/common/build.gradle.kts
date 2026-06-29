@@ -16,10 +16,12 @@
 plugins {
     alias(libs.plugins.nowinandroid.jvm.library)
     alias(libs.plugins.nowinandroid.hilt)
+    alias(libs.plugins.nowinandroid.testballoon)
 }
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.junit)
 }
