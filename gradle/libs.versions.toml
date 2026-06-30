@@ -219,7 +219,8 @@ nowinandroid-android-library-jacoco = { id = "nowinandroid.android.library.jacoc
 nowinandroid-android-lint = { id = "nowinandroid.android.lint" }
 nowinandroid-android-room = { id = "nowinandroid.android.room" }
 nowinandroid-android-test = { id = "nowinandroid.android.test" }
-nowinandroid-testballoon = { id = "nowinandroid.testballon" }
+nowinandroid-android-testballoon = { id = "nowinandroid.android.testballoon" }
+nowinandroid-testballoon = { id = "nowinandroid.testballoon" }
 nowinandroid-hilt = { id = "nowinandroid.hilt" }
 nowinandroid-jvm-library = { id = "nowinandroid.jvm.library" }
 nowinandroid-root = { id = "nowinandroid.root" }

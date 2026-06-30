@@ -100,6 +100,10 @@ gradlePlugin {
             id = libs.plugins.nowinandroid.testballoon.get().pluginId
             implementationClass = "TestBalloonConventionPlugin"
         }
+        register("androidTestBalloon") {
+            id = libs.plugins.nowinandroid.android.testballoon.get().pluginId
+            implementationClass = "AndroidTestBalloonConventionPlugin"
+        }
         register("hilt") {
             id = libs.plugins.nowinandroid.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
