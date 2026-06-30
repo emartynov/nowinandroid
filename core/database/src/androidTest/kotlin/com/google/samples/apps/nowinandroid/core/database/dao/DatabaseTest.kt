@@ -23,7 +23,7 @@ import com.google.samples.apps.nowinandroid.core.database.NiaDatabase
 import org.junit.After
 import org.junit.Before
 
-internal abstract class DatabaseTest {
+abstract class DatabaseTest {
 
     private lateinit var db: NiaDatabase
     protected lateinit var newsResourceDao: NewsResourceDao

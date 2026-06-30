@@ -26,7 +26,7 @@ import kotlin.time.Instant
 import org.junit.Test
 import kotlin.test.assertEquals
 
-internal class NewsResourceDaoTest : DatabaseTest() {
+class NewsResourceDaoTest : DatabaseTest() {
 
     @Test
     fun getNewsResources_allEntries_areOrderedByPublishDateDesc() = runTest {
