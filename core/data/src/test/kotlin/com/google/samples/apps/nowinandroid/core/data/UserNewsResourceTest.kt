@@ -23,20 +23,19 @@ import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.DEFAULT
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
-import kotlinx.datetime.Clock
-import org.junit.Test
+import de.infix.testBalloon.framework.core.testSuite
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
-class UserNewsResourceTest {
+val UserNewsResourceTest by testSuite {
 
     /**
      * Given: Some user data and news resources
      * When: They are combined using `UserNewsResource.from`
      * Then: The correct UserNewsResources are constructed
      */
-    @Test
-    fun userNewsResourcesAreConstructedFromNewsResourcesAndUserData() {
+    test("user news resources are constructed from news resources and user data") {
         val newsResource1 = NewsResource(
             id = "N1",
             title = "Test news title",

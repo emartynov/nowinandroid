@@ -19,7 +19,7 @@
 package com.google.samples.apps.nowinandroid.core.testing.data
 
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 val newsResourcesTestData: List<NewsResource> = listOf(
     NewsResource(
@@ -61,8 +61,7 @@ val newsResourcesTestData: List<NewsResource> = listOf(
     NewsResource(
         id = "4",
         title = "New Jetpack Release",
-        content = "New Jetpack release includes updates to libraries such as CameraX, Benchmark, and" +
-            "more!",
+        content = "New Jetpack release includes updates to libraries such as CameraX, Benchmark, and more!",
         url = "https://developer.android.com/jetpack/androidx/versions/all-channel",
         headerImageUrl = "",
         publishDate = Instant.parse("2022-10-01T00:00:00.000Z"),

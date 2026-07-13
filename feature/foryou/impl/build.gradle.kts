@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.nowinandroid.android.feature.impl)
     alias(libs.plugins.nowinandroid.android.library.compose)
+    alias(libs.plugins.nowinandroid.android.testballoon)
     alias(libs.plugins.roborazzi)
 }
 
@@ -33,10 +34,12 @@ dependencies {
     implementation(projects.feature.topic.api)
     implementation(libs.androidx.activity.compose)
 
+    testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.hilt.android.testing)
     testImplementation(libs.robolectric)
+    testImplementation(libs.testBalloon.integration.robolectric)
     testImplementation(projects.core.testing)
-    testDemoImplementation(projects.core.screenshotTesting)
+    testImplementation(projects.core.screenshotTesting)
 
     androidTestImplementation(libs.bundles.androidx.compose.ui.test)
     androidTestImplementation(projects.core.testing)

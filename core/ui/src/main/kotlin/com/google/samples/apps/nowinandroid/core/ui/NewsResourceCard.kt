@@ -74,12 +74,13 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaZoneId
+import java.time.Instant.ofEpochSecond
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import kotlin.time.Instant
 
 /**
  * [NewsResource] card used on the following screens: For You, Saved
@@ -277,8 +278,8 @@ fun NotificationDot(
 fun dateFormatted(publishDate: Instant): String = DateTimeFormatter
     .ofLocalizedDate(FormatStyle.MEDIUM)
     .withLocale(Locale.getDefault())
-    .withZone(LocalTimeZone.current.toJavaZoneId())
-    .format(publishDate.toJavaInstant())
+    .withZone(TimeZone.currentSystemDefault().toJavaZoneId())
+    .format(ofEpochSecond(publishDate.epochSeconds, publishDate.nanosecondsOfSecond.toLong()))
 
 @Composable
 fun NewsResourceMetaData(

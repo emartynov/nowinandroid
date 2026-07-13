@@ -27,119 +27,109 @@ import androidx.compose.ui.test.performScrollToNode
 import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTestData
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
 import com.google.samples.apps.nowinandroid.feature.topic.api.R
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 
 /**
  * UI test for checking the correct behaviour of the Topic screen;
  * Verifies that, when a specific UiState is set, the corresponding
  * composables and details are shown
  */
-class TopicScreenTest {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    private lateinit var topicLoading: String
-
-    @Before
-    fun setup() {
-        composeTestRule.activity.apply {
-            topicLoading = getString(R.string.feature_topic_api_loading)
+val TopicScreenTest by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+            val topicLoading: String get() = composeTestRule.activity.getString(R.string.feature_topic_api_loading)
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun niaLoadingWheel_whenScreenIsLoading_showLoading() {
-        composeTestRule.setContent {
-            TopicScreen(
-                topicUiState = TopicUiState.Loading,
-                newsUiState = NewsUiState.Loading,
-                showBackButton = true,
-                onBackClick = {},
-                onFollowClick = {},
-                onTopicClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
-            )
+        test("niaLoadingWheel_whenScreenIsLoading_showLoading") {
+            composeTestRule.setContent {
+                TopicScreen(
+                    topicUiState = TopicUiState.Loading,
+                    newsUiState = NewsUiState.Loading,
+                    showBackButton = true,
+                    onBackClick = {},
+                    onFollowClick = {},
+                    onTopicClick = {},
+                    onBookmarkChanged = { _, _ -> },
+                    onNewsResourceViewed = {},
+                )
+            }
+
+            composeTestRule
+                .onNodeWithContentDescription(topicLoading)
+                .assertExists()
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(topicLoading)
-            .assertExists()
-    }
+        test("topicTitle_whenTopicIsSuccess_isShown") {
+            val testTopic = followableTopicTestData.first()
+            composeTestRule.setContent {
+                TopicScreen(
+                    topicUiState = TopicUiState.Success(testTopic),
+                    newsUiState = NewsUiState.Loading,
+                    showBackButton = true,
+                    onBackClick = {},
+                    onFollowClick = {},
+                    onTopicClick = {},
+                    onBookmarkChanged = { _, _ -> },
+                    onNewsResourceViewed = {},
+                )
+            }
 
-    @Test
-    fun topicTitle_whenTopicIsSuccess_isShown() {
-        val testTopic = followableTopicTestData.first()
-        composeTestRule.setContent {
-            TopicScreen(
-                topicUiState = TopicUiState.Success(testTopic),
-                newsUiState = NewsUiState.Loading,
-                showBackButton = true,
-                onBackClick = {},
-                onFollowClick = {},
-                onTopicClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
-            )
+            // Name is shown
+            composeTestRule
+                .onNodeWithText(testTopic.topic.name)
+                .assertExists()
+
+            // Description is shown
+            composeTestRule
+                .onNodeWithText(testTopic.topic.longDescription)
+                .assertExists()
         }
 
-        // Name is shown
-        composeTestRule
-            .onNodeWithText(testTopic.topic.name)
-            .assertExists()
+        test("news_whenTopicIsLoading_isNotShown") {
+            composeTestRule.setContent {
+                TopicScreen(
+                    topicUiState = TopicUiState.Loading,
+                    newsUiState = NewsUiState.Success(userNewsResourcesTestData),
+                    showBackButton = true,
+                    onBackClick = {},
+                    onFollowClick = {},
+                    onTopicClick = {},
+                    onBookmarkChanged = { _, _ -> },
+                    onNewsResourceViewed = {},
+                )
+            }
 
-        // Description is shown
-        composeTestRule
-            .onNodeWithText(testTopic.topic.longDescription)
-            .assertExists()
-    }
-
-    @Test
-    fun news_whenTopicIsLoading_isNotShown() {
-        composeTestRule.setContent {
-            TopicScreen(
-                topicUiState = TopicUiState.Loading,
-                newsUiState = NewsUiState.Success(userNewsResourcesTestData),
-                showBackButton = true,
-                onBackClick = {},
-                onFollowClick = {},
-                onTopicClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
-            )
+            // Loading indicator shown
+            composeTestRule
+                .onNodeWithContentDescription(topicLoading)
+                .assertExists()
         }
 
-        // Loading indicator shown
-        composeTestRule
-            .onNodeWithContentDescription(topicLoading)
-            .assertExists()
-    }
+        test("news_whenSuccessAndTopicIsSuccess_isShown") {
+            val testTopic = followableTopicTestData.first()
+            composeTestRule.setContent {
+                TopicScreen(
+                    topicUiState = TopicUiState.Success(testTopic),
+                    newsUiState = NewsUiState.Success(
+                        userNewsResourcesTestData,
+                    ),
+                    showBackButton = true,
+                    onBackClick = {},
+                    onFollowClick = {},
+                    onTopicClick = {},
+                    onBookmarkChanged = { _, _ -> },
+                    onNewsResourceViewed = {},
+                )
+            }
 
-    @Test
-    fun news_whenSuccessAndTopicIsSuccess_isShown() {
-        val testTopic = followableTopicTestData.first()
-        composeTestRule.setContent {
-            TopicScreen(
-                topicUiState = TopicUiState.Success(testTopic),
-                newsUiState = NewsUiState.Success(
-                    userNewsResourcesTestData,
-                ),
-                showBackButton = true,
-                onBackClick = {},
-                onFollowClick = {},
-                onTopicClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
-            )
+            // Scroll to first news title if available
+            composeTestRule
+                .onAllNodes(hasScrollToNodeAction())
+                .onFirst()
+                .performScrollToNode(hasText(userNewsResourcesTestData.first().title))
         }
-
-        // Scroll to first news title if available
-        composeTestRule
-            .onAllNodes(hasScrollToNodeAction())
-            .onFirst()
-            .performScrollToNode(hasText(userNewsResourcesTestData.first().title))
     }
 }

@@ -72,146 +72,103 @@ import com.google.samples.apps.nowinandroid.uitesthiltmanifest.HiltComponentActi
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.disable
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
 import java.util.TimeZone
 import javax.inject.Inject
 
 /**
  * Tests that the Snackbar is correctly displayed on different screen sizes.
  */
-@RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-// Configure Robolectric to use a very large screen size that can fit all of the test sizes.
-// This allows enough room to render the content under test without clipping or scaling.
-@Config(application = HiltTestApplication::class, qualifiers = "w1000dp-h1000dp-480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
+val SnackbarInsetsScreenshotTests by testSuite {
+    robolectricTestSuite<SnackbarInsetsScreenshotTestsContent>(
+        "Snackbar insets screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "w1000dp-h1000dp-480dpi"
+        }
+// TODO: re-enable when https://github.com/infix-de/testBalloon/issues/86 is fixed
+            .disable(),
+    )
+}
+
+class SnackbarInsetsScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture { SnackbarInsetsFixture() } asContextForEach {
+        test("phone no snackbar") {
+            captureSnackbarScreenshot(400.dp, 500.dp, "insets_snackbar_compact_medium_noSnackbar") { }
+        }
+        test("snackbar shown phone") {
+            captureSnackbarScreenshot(400.dp, 500.dp, "insets_snackbar_compact_medium") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+        test("snackbar shown foldable") {
+            captureSnackbarScreenshot(600.dp, 600.dp, "insets_snackbar_medium_medium") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+        test("snackbar shown tablet") {
+            captureSnackbarScreenshot(900.dp, 900.dp, "insets_snackbar_expanded_expanded") { snackbarHostState ->
+                snackbarHostState.showSnackbar(
+                    "This is a test snackbar message",
+                    actionLabel = "Action Label",
+                    duration = Indefinite,
+                )
+            }
+        }
+    }
+})
+
 @HiltAndroidTest
-class SnackbarInsetsScreenshotTests {
+class SnackbarInsetsFixture : JUnit4RulesContext() {
+    val hiltRule = rule(HiltAndroidRule(this))
+    val composeTestRule = rule(createAndroidComposeRule<HiltComponentActivity>())
 
-    /**
-     * Manages the components' state and is used to perform injection on your test
-     */
-    @get:Rule(order = 0)
-    val hiltRule = HiltAndroidRule(this)
+    @Inject lateinit var networkMonitor: NetworkMonitor
 
-    /**
-     * Use a test activity to set the content on.
-     */
-    @get:Rule(order = 1)
-    val composeTestRule = createAndroidComposeRule<HiltComponentActivity>()
+    @Inject lateinit var timeZoneMonitor: TimeZoneMonitor
 
-    @Inject
-    lateinit var networkMonitor: NetworkMonitor
+    @Inject lateinit var userDataRepository: FakeUserDataRepository
 
-    @Inject
-    lateinit var timeZoneMonitor: TimeZoneMonitor
+    @Inject lateinit var topicsRepository: TopicsRepository
 
-    @Inject
-    lateinit var userDataRepository: FakeUserDataRepository
+    @Inject lateinit var userNewsResourceRepository: UserNewsResourceRepository
 
-    @Inject
-    lateinit var topicsRepository: TopicsRepository
-
-    @Inject
-    lateinit var userNewsResourceRepository: UserNewsResourceRepository
-
-    @Before
-    fun setup() {
-        hiltRule.inject()
-
-        // Configure user data
-        runBlocking {
-            userDataRepository.setShouldHideOnboarding(true)
-
-            userDataRepository.setFollowedTopicIds(
-                setOf(topicsRepository.getTopics().first().first().id),
-            )
-        }
-    }
-
-    @Before
-    fun setTimeZone() {
-        // Make time zone deterministic in tests
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    }
-
-    @Test
-    fun phone_noSnackbar() {
-        testSnackbarScreenshotWithSize(
-            400.dp,
-            500.dp,
-            "insets_snackbar_compact_medium_noSnackbar",
-            action = { },
-        )
-    }
-
-    @Test
-    fun snackbarShown_phone() {
-        testSnackbarScreenshotWithSize(
-            400.dp,
-            500.dp,
-            "insets_snackbar_compact_medium",
-        ) { snackbarHostState ->
-            snackbarHostState.showSnackbar(
-                "This is a test snackbar message",
-                actionLabel = "Action Label",
-                duration = Indefinite,
-            )
-        }
-    }
-
-    @Test
-    fun snackbarShown_foldable() {
-        testSnackbarScreenshotWithSize(
-            600.dp,
-            600.dp,
-            "insets_snackbar_medium_medium",
-        ) { snackbarHostState ->
-            snackbarHostState.showSnackbar(
-                "This is a test snackbar message",
-                actionLabel = "Action Label",
-                duration = Indefinite,
-            )
-        }
-    }
-
-    @Test
-    fun snackbarShown_tablet() {
-        testSnackbarScreenshotWithSize(
-            900.dp,
-            900.dp,
-            "insets_snackbar_expanded_expanded",
-        ) { snackbarHostState ->
-            snackbarHostState.showSnackbar(
-                "This is a test snackbar message",
-                actionLabel = "Action Label",
-                duration = Indefinite,
-            )
-        }
-    }
-
-    private fun testSnackbarScreenshotWithSize(
+    fun captureSnackbarScreenshot(
         width: Dp,
         height: Dp,
         screenshotName: String,
         action: suspend (snackbarHostState: SnackbarHostState) -> Unit,
     ) {
+        hiltRule.inject()
+        runBlocking {
+            userDataRepository.setShouldHideOnboarding(true)
+            userDataRepository.setFollowedTopicIds(
+                setOf(topicsRepository.getTopics().first().first().id),
+            )
+        }
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
         lateinit var scope: CoroutineScope
         val snackbarHostState = SnackbarHostState()
         composeTestRule.setContent {
             CompositionLocalProvider(
-                // Replaces images with placeholders
                 LocalInspectionMode provides true,
                 LocalSnackbarHostState provides snackbarHostState,
             ) {
@@ -272,9 +229,7 @@ class SnackbarInsetsScreenshotTests {
             }
         }
 
-        scope.launch {
-            action(snackbarHostState)
-        }
+        scope.launch { action(snackbarHostState) }
 
         composeTestRule.onNodeWithTag("root")
             .captureRoboImage(

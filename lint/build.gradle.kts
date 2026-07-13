@@ -20,6 +20,7 @@ plugins {
     `java-library`
     kotlin("jvm")
     alias(libs.plugins.nowinandroid.android.lint)
+    alias(libs.plugins.nowinandroid.android.testballoon)
 }
 
 java {

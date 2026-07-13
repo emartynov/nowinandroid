@@ -29,136 +29,147 @@ import com.google.samples.apps.nowinandroid.core.testing.util.TestTimeZoneMonito
 import com.google.samples.apps.nowinandroid.feature.bookmarks.api.navigation.BookmarksNavKey
 import com.google.samples.apps.nowinandroid.feature.foryou.api.navigation.ForYouNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
-import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 
 /**
  * Tests [NiaAppState].
  */
-@RunWith(RobolectricTestRunner::class)
-@Config(application = HiltTestApplication::class)
-@HiltAndroidTest
-class NiaAppStateTest {
-
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
-    // Create the test dependencies.
-    private val networkMonitor = TestNetworkMonitor()
-
-    private val timeZoneMonitor = TestTimeZoneMonitor()
-
-    private val userNewsResourceRepository =
-        CompositeUserNewsResourceRepository(TestNewsRepository(), TestUserDataRepository())
-
-    // Subject under test.
-    private lateinit var state: NiaAppState
-
-    private fun testNavigationState() = NavigationState(
-        startKey = ForYouNavKey,
-        topLevelStack = NavBackStack(ForYouNavKey),
-        subStacks = mapOf(
-            ForYouNavKey to NavBackStack(ForYouNavKey),
-            BookmarksNavKey to NavBackStack(BookmarksNavKey),
-        ),
+val NiaAppStateTest by testSuite {
+    robolectricTestSuite<NiaAppStateTestContent>(
+        "NiaAppState tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+        },
     )
+}
 
-    @Test
-    fun niaAppState_currentDestination() = runTest {
-        val navigationState = testNavigationState()
-        val navigator = Navigator(navigationState)
+class NiaAppStateTestContent : RobolectricTestSuiteContent({
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createComposeRule())
+            val networkMonitor = TestNetworkMonitor()
+            val timeZoneMonitor = TestTimeZoneMonitor()
+            val userNewsResourceRepository =
+                CompositeUserNewsResourceRepository(TestNewsRepository(), TestUserDataRepository())
+        }
+    } asContextForEach {
 
-        composeTestRule.setContent {
-            state = remember(navigationState) {
-                NiaAppState(
-                    coroutineScope = backgroundScope,
+        fun testNavigationState() = NavigationState(
+            startKey = ForYouNavKey,
+            topLevelStack = NavBackStack(ForYouNavKey),
+            subStacks = mapOf(
+                ForYouNavKey to NavBackStack(ForYouNavKey),
+                BookmarksNavKey to NavBackStack(BookmarksNavKey),
+            ),
+        )
+
+        test("nia app state current destination") {
+            val navigationState = testNavigationState()
+            val navigator = Navigator(navigationState)
+            lateinit var state: NiaAppState
+
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+
+            composeTestRule.setContent {
+                state = remember(navigationState) {
+                    NiaAppState(
+                        coroutineScope = coroutineScope,
+                        networkMonitor = networkMonitor,
+                        userNewsResourceRepository = userNewsResourceRepository,
+                        timeZoneMonitor = timeZoneMonitor,
+                        navigationState = navigationState,
+                    )
+                }
+            }
+
+            assertEquals(ForYouNavKey, state.navigationState.currentTopLevelKey)
+            assertEquals(ForYouNavKey, state.navigationState.currentKey)
+
+            // Navigate to another destination once
+            navigator.navigate(BookmarksNavKey)
+
+            composeTestRule.waitForIdle()
+
+            assertEquals(BookmarksNavKey, state.navigationState.currentTopLevelKey)
+            assertEquals(BookmarksNavKey, state.navigationState.currentKey)
+        }
+
+        test("nia app state destinations") {
+            lateinit var state: NiaAppState
+
+            composeTestRule.setContent {
+                state = rememberNiaAppState(
                     networkMonitor = networkMonitor,
                     userNewsResourceRepository = userNewsResourceRepository,
                     timeZoneMonitor = timeZoneMonitor,
-                    navigationState = navigationState,
                 )
             }
-        }
 
-        assertEquals(ForYouNavKey, state.navigationState.currentTopLevelKey)
-        assertEquals(ForYouNavKey, state.navigationState.currentKey)
+            val navigationState = state.navigationState
 
-        // Navigate to another destination once
-        navigator.navigate(BookmarksNavKey)
-
-        composeTestRule.waitForIdle()
-
-        assertEquals(BookmarksNavKey, state.navigationState.currentTopLevelKey)
-        assertEquals(BookmarksNavKey, state.navigationState.currentKey)
-    }
-
-    @Test
-    fun niaAppState_destinations() = runTest {
-        composeTestRule.setContent {
-            state = rememberNiaAppState(
-                networkMonitor = networkMonitor,
-                userNewsResourceRepository = userNewsResourceRepository,
-                timeZoneMonitor = timeZoneMonitor,
+            assertEquals(3, navigationState.topLevelKeys.size)
+            assertEquals(
+                setOf(ForYouNavKey, BookmarksNavKey, InterestsNavKey(null)),
+                navigationState.topLevelKeys,
             )
         }
 
-        val navigationState = state.navigationState
+        test("nia app state when network monitor is offline state is offline") {
+            lateinit var state: NiaAppState
 
-        assertEquals(3, navigationState.topLevelKeys.size)
-        assertEquals(
-            setOf(ForYouNavKey, BookmarksNavKey, InterestsNavKey(null)),
-            navigationState.topLevelKeys,
-        )
-    }
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
 
-    @Test
-    fun niaAppState_whenNetworkMonitorIsOffline_StateIsOffline() = runTest(UnconfinedTestDispatcher()) {
-        composeTestRule.setContent {
-            state = NiaAppState(
-                coroutineScope = backgroundScope,
-                networkMonitor = networkMonitor,
-                userNewsResourceRepository = userNewsResourceRepository,
-                timeZoneMonitor = timeZoneMonitor,
-                navigationState = testNavigationState(),
+            composeTestRule.setContent {
+                state = NiaAppState(
+                    coroutineScope = coroutineScope,
+                    networkMonitor = networkMonitor,
+                    userNewsResourceRepository = userNewsResourceRepository,
+                    timeZoneMonitor = timeZoneMonitor,
+                    navigationState = testNavigationState(),
+                )
+            }
+
+            coroutineScope.launch { state.isOffline.collect() }
+            networkMonitor.setConnected(false)
+            assertEquals(
+                true,
+                state.isOffline.value,
             )
         }
 
-        backgroundScope.launch { state.isOffline.collect() }
-        networkMonitor.setConnected(false)
-        assertEquals(
-            true,
-            state.isOffline.value,
-        )
-    }
+        test("nia app state different TZ with time zone monitor change") {
+            lateinit var state: NiaAppState
 
-    @Test
-    fun niaAppState_differentTZ_withTimeZoneMonitorChange() = runTest(UnconfinedTestDispatcher()) {
-        composeTestRule.setContent {
-            state = NiaAppState(
-                coroutineScope = backgroundScope,
-                networkMonitor = networkMonitor,
-                userNewsResourceRepository = userNewsResourceRepository,
-                timeZoneMonitor = timeZoneMonitor,
-                navigationState = testNavigationState(),
+            val coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+
+            composeTestRule.setContent {
+                state = NiaAppState(
+                    coroutineScope = coroutineScope,
+                    networkMonitor = networkMonitor,
+                    userNewsResourceRepository = userNewsResourceRepository,
+                    timeZoneMonitor = timeZoneMonitor,
+                    navigationState = testNavigationState(),
+                )
+            }
+            val changedTz = TimeZone.of("Europe/Prague")
+            coroutineScope.launch { state.currentTimeZone.collect() }
+            timeZoneMonitor.setTimeZone(changedTz)
+            assertEquals(
+                changedTz,
+                state.currentTimeZone.value,
             )
         }
-        val changedTz = TimeZone.of("Europe/Prague")
-        backgroundScope.launch { state.currentTimeZone.collect() }
-        timeZoneMonitor.setTimeZone(changedTz)
-        assertEquals(
-            changedTz,
-            state.currentTimeZone.value,
-        )
     }
-}
+})

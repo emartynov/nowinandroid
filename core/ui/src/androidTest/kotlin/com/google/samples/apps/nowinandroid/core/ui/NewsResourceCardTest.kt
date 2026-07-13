@@ -24,132 +24,131 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import com.google.samples.apps.nowinandroid.core.testing.data.followableTopicTestData
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
-import org.junit.Rule
-import org.junit.Test
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.testSuite
 
-class NewsResourceCardTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun testMetaDataDisplay_withCodelabResource() {
-        val newsWithKnownResourceType = userNewsResourcesTestData[0]
-        lateinit var dateFormatted: String
-
-        composeTestRule.setContent {
-            NewsResourceCardExpanded(
-                userNewsResource = newsWithKnownResourceType,
-                isBookmarked = false,
-                hasBeenViewed = false,
-                onToggleBookmark = {},
-                onClick = {},
-                onTopicClick = {},
-            )
-
-            dateFormatted = dateFormatted(publishDate = newsWithKnownResourceType.publishDate)
+val NewsResourceCardTest by testSuite {
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
+    } asContextForEach {
 
-        composeTestRule
-            .onNodeWithText(
-                composeTestRule.activity.getString(
-                    R.string.core_ui_card_meta_data_text,
-                    dateFormatted,
-                    newsWithKnownResourceType.type,
-                ),
-            )
-            .assertExists()
-    }
+        test("meta data display with codelab resource") {
+            val newsWithKnownResourceType = userNewsResourcesTestData[0]
+            lateinit var dateFormatted: String
 
-    @Test
-    fun testMetaDataDisplay_withEmptyResourceType() {
-        val newsWithEmptyResourceType = userNewsResourcesTestData[3]
-        lateinit var dateFormatted: String
+            composeTestRule.setContent {
+                NewsResourceCardExpanded(
+                    userNewsResource = newsWithKnownResourceType,
+                    isBookmarked = false,
+                    hasBeenViewed = false,
+                    onToggleBookmark = {},
+                    onClick = {},
+                    onTopicClick = {},
+                )
 
-        composeTestRule.setContent {
-            NewsResourceCardExpanded(
-                userNewsResource = newsWithEmptyResourceType,
-                isBookmarked = false,
-                hasBeenViewed = false,
-                onToggleBookmark = {},
-                onClick = {},
-                onTopicClick = {},
-            )
-
-            dateFormatted = dateFormatted(publishDate = newsWithEmptyResourceType.publishDate)
-        }
-
-        composeTestRule
-            .onNodeWithText(dateFormatted)
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun testTopicsChipColorBackground_matchesFollowedState() {
-        composeTestRule.setContent {
-            NewsResourceTopics(
-                topics = followableTopicTestData,
-                onTopicClick = {},
-            )
-        }
-
-        for (followableTopic in followableTopicTestData) {
-            val topicName = followableTopic.topic.name
-            val expectedContentDescription = if (followableTopic.isFollowed) {
-                "$topicName is followed"
-            } else {
-                "$topicName is not followed"
+                dateFormatted = dateFormatted(publishDate = newsWithKnownResourceType.publishDate)
             }
+
             composeTestRule
-                .onNodeWithText(topicName.uppercase())
-                .assertContentDescriptionEquals(expectedContentDescription)
-        }
-    }
-
-    @Test
-    fun testUnreadDot_displayedWhenUnread() {
-        val unreadNews = userNewsResourcesTestData[2]
-
-        composeTestRule.setContent {
-            NewsResourceCardExpanded(
-                userNewsResource = unreadNews,
-                isBookmarked = false,
-                hasBeenViewed = false,
-                onToggleBookmark = {},
-                onClick = {},
-                onTopicClick = {},
-            )
+                .onNodeWithText(
+                    composeTestRule.activity.getString(
+                        R.string.core_ui_card_meta_data_text,
+                        dateFormatted,
+                        newsWithKnownResourceType.type,
+                    ),
+                )
+                .assertExists()
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.getString(
-                    R.string.core_ui_unread_resource_dot_content_description,
-                ),
-            )
-            .assertIsDisplayed()
-    }
+        test("meta data display with empty resource type") {
+            val newsWithEmptyResourceType = userNewsResourcesTestData[3]
+            lateinit var dateFormatted: String
 
-    @Test
-    fun testUnreadDot_notDisplayedWhenRead() {
-        val readNews = userNewsResourcesTestData[0]
+            composeTestRule.setContent {
+                NewsResourceCardExpanded(
+                    userNewsResource = newsWithEmptyResourceType,
+                    isBookmarked = false,
+                    hasBeenViewed = false,
+                    onToggleBookmark = {},
+                    onClick = {},
+                    onTopicClick = {},
+                )
 
-        composeTestRule.setContent {
-            NewsResourceCardExpanded(
-                userNewsResource = readNews,
-                isBookmarked = false,
-                hasBeenViewed = true,
-                onToggleBookmark = {},
-                onClick = {},
-                onTopicClick = {},
-            )
+                dateFormatted = dateFormatted(publishDate = newsWithEmptyResourceType.publishDate)
+            }
+
+            composeTestRule
+                .onNodeWithText(dateFormatted)
+                .assertIsDisplayed()
         }
 
-        composeTestRule
-            .onNodeWithContentDescription(
-                composeTestRule.activity.getString(
-                    R.string.core_ui_unread_resource_dot_content_description,
-                ),
-            )
-            .assertDoesNotExist()
+        test("topics chip color background matches followed state") {
+            composeTestRule.setContent {
+                NewsResourceTopics(
+                    topics = followableTopicTestData,
+                    onTopicClick = {},
+                )
+            }
+
+            for (followableTopic in followableTopicTestData) {
+                val topicName = followableTopic.topic.name
+                val expectedContentDescription = if (followableTopic.isFollowed) {
+                    "$topicName is followed"
+                } else {
+                    "$topicName is not followed"
+                }
+                composeTestRule
+                    .onNodeWithText(topicName.uppercase())
+                    .assertContentDescriptionEquals(expectedContentDescription)
+            }
+        }
+
+        test("unread dot displayed when unread") {
+            val unreadNews = userNewsResourcesTestData[2]
+
+            composeTestRule.setContent {
+                NewsResourceCardExpanded(
+                    userNewsResource = unreadNews,
+                    isBookmarked = false,
+                    hasBeenViewed = false,
+                    onToggleBookmark = {},
+                    onClick = {},
+                    onTopicClick = {},
+                )
+            }
+
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.getString(
+                        R.string.core_ui_unread_resource_dot_content_description,
+                    ),
+                )
+                .assertIsDisplayed()
+        }
+
+        test("unread dot not displayed when read") {
+            val readNews = userNewsResourcesTestData[0]
+
+            composeTestRule.setContent {
+                NewsResourceCardExpanded(
+                    userNewsResource = readNews,
+                    isBookmarked = false,
+                    hasBeenViewed = true,
+                    onToggleBookmark = {},
+                    onClick = {},
+                    onTopicClick = {},
+                )
+            }
+
+            composeTestRule
+                .onNodeWithContentDescription(
+                    composeTestRule.activity.getString(
+                        R.string.core_ui_unread_resource_dot_content_description,
+                    ),
+                )
+                .assertDoesNotExist()
+        }
     }
 }

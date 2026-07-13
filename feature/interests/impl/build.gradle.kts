@@ -18,7 +18,9 @@ plugins {
     alias(libs.plugins.nowinandroid.android.feature.impl)
     alias(libs.plugins.nowinandroid.android.library.compose)
     alias(libs.plugins.nowinandroid.android.library.jacoco)
+    alias(libs.plugins.nowinandroid.android.testballoon)
 }
+
 android {
     namespace = "com.google.samples.apps.nowinandroid.feature.interests.impl"
     testOptions.unitTests.isIncludeAndroidResources = true
@@ -37,6 +39,7 @@ dependencies {
     testImplementation(projects.core.testing)
     testImplementation(projects.core.dataTest)
     testImplementation(libs.robolectric)
+    testImplementation(libs.testBalloon.integration.robolectric)
     testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.androidx.test.espresso.core)
     testImplementation(libs.hilt.android.testing)

@@ -44,12 +44,12 @@ googleOss = "17.1.0"
 googleOssPlugin = "0.10.9"
 hilt = "2.59"
 hiltExt = "1.2.0"
-jacoco = "0.8.12"
+jacoco = "0.8.15"
 junit4 = "4.13.2"
-kotlin = "2.3.0"
-kotlinxCoroutines = "1.10.1"
-kotlinxDatetime = "0.6.1"
-kotlinxSerializationJson = "1.8.0"
+kotlin = "2.4.0"
+kotlinxCoroutines = "1.10.2"
+kotlinxDatetime = "0.8.0"
+kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.4"
 ktlint = "1.4.0"
 okhttp = "4.12.0"
@@ -58,10 +58,11 @@ protobufPlugin = "0.9.6"
 retrofit = "2.11.0"
 retrofitKotlinxSerializationJson = "1.0.0"
 robolectric = "4.16"
-roborazzi = "1.56.0"
+roborazzi = "1.64.0"
 room = "2.8.3"
 spotless = "8.3.0"
 truth = "1.4.4"
+testBalloon = "1.0.1-K2.4.0-SNAPSHOT"
 turbine = "1.2.0"
 uiTestJunit4 = "1.9.0-rc01"
 
@@ -161,6 +162,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+testBalloon-framework-core = { group = "de.infix.testBalloon", name = "testBalloon-framework-core", version.ref = "testBalloon" }
+testBalloon-integration-robolectric = { group = "de.infix.testBalloon", name = "testBalloon-integration-robolectric", version.ref = "testBalloon" }
+testBalloon-gradlePlugin = { group = "de.infix.testBalloon", name = "testBalloon-gradle-plugin", version.ref = "testBalloon" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 # Dependencies of the included build-logic
@@ -195,6 +199,7 @@ protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+testBalloon = { id = "de.infix.testBalloon", version.ref = "testBalloon" }
 
 # Plugins defined by this project
 nowinandroid-android-application = { id = "nowinandroid.android.application" }
@@ -205,6 +210,7 @@ nowinandroid-android-application-jacoco = { id = "nowinandroid.android.applicati
 nowinandroid-android-feature-impl = { id = "nowinandroid.android.feature.impl" }
 nowinandroid-android-feature-api = { id = "nowinandroid.android.feature.api" }
 nowinandroid-android-library = { id = "nowinandroid.android.library" }
+nowinandroid-android-testballoon = { id = "nowinandroid.android.testballoon" }
 nowinandroid-android-library-compose = { id = "nowinandroid.android.library.compose" }
 nowinandroid-android-library-jacoco = { id = "nowinandroid.android.library.jacoco" }
 nowinandroid-android-lint = { id = "nowinandroid.android.lint" }

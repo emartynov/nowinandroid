@@ -25,56 +25,62 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaIconT
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 
-@RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(application = HiltTestApplication::class, qualifiers = "480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
-class IconButtonScreenshotTests {
+val IconButtonScreenshotTests by testSuite {
+    robolectricTestSuite<IconButtonScreenshotTestsContent>(
+        "IconButton screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "480dpi"
+        },
+    )
+}
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun iconButton_multipleThemes() {
-        composeTestRule.captureMultiTheme("IconButton") {
-            NiaIconToggleExample(false)
+class IconButtonScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
         }
-    }
+    } asContextForEach {
 
-    @Test
-    fun iconButton_unchecked_multipleThemes() {
-        composeTestRule.captureMultiTheme("IconButton", "IconButtonUnchecked") {
-            Surface {
-                NiaIconToggleExample(true)
+        test("icon button multiple themes") {
+            composeTestRule.captureMultiTheme("IconButton") {
+                NiaIconToggleExample(false)
+            }
+        }
+
+        test("icon button unchecked multiple themes") {
+            composeTestRule.captureMultiTheme("IconButton", "IconButtonUnchecked") {
+                Surface {
+                    NiaIconToggleExample(true)
+                }
             }
         }
     }
+})
 
-    @Composable
-    private fun NiaIconToggleExample(checked: Boolean) {
-        NiaIconToggleButton(
-            checked = checked,
-            onCheckedChange = { },
-            icon = {
-                Icon(
-                    imageVector = NiaIcons.BookmarkBorder,
-                    contentDescription = null,
-                )
-            },
-            checkedIcon = {
-                Icon(
-                    imageVector = NiaIcons.Bookmark,
-                    contentDescription = null,
-                )
-            },
-        )
-    }
+@Composable
+private fun NiaIconToggleExample(checked: Boolean) {
+    NiaIconToggleButton(
+        checked = checked,
+        onCheckedChange = { },
+        icon = {
+            Icon(
+                imageVector = NiaIcons.BookmarkBorder,
+                contentDescription = null,
+            )
+        },
+        checkedIcon = {
+            Icon(
+                imageVector = NiaIcons.Bookmark,
+                contentDescription = null,
+            )
+        },
+    )
 }

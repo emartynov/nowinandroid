@@ -27,57 +27,62 @@ import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.testing.util.DefaultRoborazziOptions
 import com.google.samples.apps.nowinandroid.core.testing.util.captureMultiTheme
 import dagger.hilt.android.testing.HiltTestApplication
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
-import org.robolectric.annotation.LooperMode
+import de.infix.testBalloon.framework.core.JUnit4RulesContext
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.testSuite
+import de.infix.testBalloon.integration.robolectric.RobolectricTestSuiteContent
+import de.infix.testBalloon.integration.robolectric.robolectric
+import de.infix.testBalloon.integration.robolectric.robolectricTestSuite
 
-@RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(application = HiltTestApplication::class, qualifiers = "480dpi")
-@LooperMode(LooperMode.Mode.PAUSED)
-class LoadingWheelScreenshotTests {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @Test
-    fun loadingWheel_multipleThemes() {
-        composeTestRule.captureMultiTheme("LoadingWheel") {
-            Surface {
-                NiaLoadingWheel(contentDesc = "test")
-            }
-        }
-    }
-
-    @Test
-    fun overlayLoadingWheel_multipleThemes() {
-        composeTestRule.captureMultiTheme("LoadingWheel", "OverlayLoadingWheel") {
-            Surface {
-                NiaOverlayLoadingWheel(contentDesc = "test")
-            }
-        }
-    }
-
-    @Test
-    fun loadingWheelAnimation() {
-        composeTestRule.mainClock.autoAdvance = false
-        composeTestRule.setContent {
-            NiaTheme {
-                NiaLoadingWheel(contentDesc = "")
-            }
-        }
-        // Try multiple frames of the animation; some arbitrary, some synchronized with duration.
-        listOf(20L, 115L, 724L, 1000L).forEach { deltaTime ->
-            composeTestRule.mainClock.advanceTimeBy(deltaTime)
-            composeTestRule.onRoot()
-                .captureRoboImage(
-                    "src/test/screenshots/LoadingWheel/LoadingWheel_animation_$deltaTime.png",
-                    roborazziOptions = DefaultRoborazziOptions,
-                )
-        }
-    }
+val LoadingWheelScreenshotTests by testSuite {
+    robolectricTestSuite<LoadingWheelScreenshotTestsContent>(
+        "LoadingWheel screenshot tests",
+        testConfig = TestConfig.robolectric {
+            application = HiltTestApplication::class
+            qualifiers = "480dpi"
+        },
+    )
 }
+
+class LoadingWheelScreenshotTestsContent : RobolectricTestSuiteContent({
+    testFixture {
+        object : JUnit4RulesContext() {
+            val composeTestRule = rule(createAndroidComposeRule<ComponentActivity>())
+        }
+    } asContextForEach {
+
+        test("loading wheel multiple themes") {
+            composeTestRule.captureMultiTheme("LoadingWheel") {
+                Surface {
+                    NiaLoadingWheel(contentDesc = "test")
+                }
+            }
+        }
+
+        test("overlay loading wheel multiple themes") {
+            composeTestRule.captureMultiTheme("LoadingWheel", "OverlayLoadingWheel") {
+                Surface {
+                    NiaOverlayLoadingWheel(contentDesc = "test")
+                }
+            }
+        }
+
+        test("loading wheel animation") {
+            composeTestRule.mainClock.autoAdvance = false
+            composeTestRule.setContent {
+                NiaTheme {
+                    NiaLoadingWheel(contentDesc = "")
+                }
+            }
+            // Try multiple frames of the animation; some arbitrary, some synchronized with duration.
+            listOf(20L, 115L, 724L, 1000L).forEach { deltaTime ->
+                composeTestRule.mainClock.advanceTimeBy(deltaTime)
+                composeTestRule.onRoot()
+                    .captureRoboImage(
+                        "src/test/screenshots/LoadingWheel/LoadingWheel_animation_$deltaTime.png",
+                        roborazziOptions = DefaultRoborazziOptions,
+                    )
+            }
+        }
+    }
+})

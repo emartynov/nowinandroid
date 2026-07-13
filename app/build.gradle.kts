@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.nowinandroid.android.application.flavors)
     alias(libs.plugins.nowinandroid.android.application.jacoco)
     alias(libs.plugins.nowinandroid.android.application.firebase)
+    alias(libs.plugins.nowinandroid.android.testballoon)
     alias(libs.plugins.nowinandroid.hilt)
     alias(libs.plugins.google.osslicenses)
     alias(libs.plugins.baselineprofile)
@@ -123,6 +124,7 @@ dependencies {
 
     testDemoImplementation(libs.androidx.navigation.testing)
     testDemoImplementation(libs.robolectric)
+    testDemoImplementation(libs.testBalloon.integration.robolectric)
     testDemoImplementation(libs.roborazzi)
     testDemoImplementation(projects.core.screenshotTesting)
     testDemoImplementation(projects.core.testing)
